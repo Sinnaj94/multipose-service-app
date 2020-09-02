@@ -20,4 +20,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
+    <com.google.android.material.button.MaterialButton android:layout_width="match_parent"
+                                                       app:layout_constraintTop_toTopOf="parent"
+                                                       android:text="Discover Services"
+                                                       android:layout_height="wrap_content"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
