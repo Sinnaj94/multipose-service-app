@@ -32,7 +32,7 @@ class NetworkDiscovery : Runnable {
                 val socket = Socket()
 
                 try {
-                    socket.connect(adr, 200)
+                    socket.connect(adr, 100)
                     Log.d(TAG,"Connected to $adr")
                     validateNetwork(adr)
                 } catch (e: Exception) {
@@ -44,7 +44,7 @@ class NetworkDiscovery : Runnable {
 
     private fun validateNetwork(adr: InetSocketAddress): Boolean {
         // TODO: Persist the address on connect.
-        val host = "http://${adr.address}:${adr.port}"
+        val host = "http:/${adr.address}:${adr.port}"
 
         ServiceBuilder.buildRetrofit(host)
         Log.d(TAG, "Host: $host")

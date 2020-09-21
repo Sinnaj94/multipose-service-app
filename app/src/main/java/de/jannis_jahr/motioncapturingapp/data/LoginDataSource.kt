@@ -1,12 +1,11 @@
 package de.jannis_jahr.motioncapturingapp.data
 
 import android.os.AsyncTask
-import android.util.Log
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
+import de.jannis_jahr.motioncapturingapp.network.services.model.Token
 import de.jannis_jahr.motioncapturingapp.network.services.model.User
 import okhttp3.OkHttpClient
-import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -19,7 +18,7 @@ class LoginDataSource : AsyncTask<Array<String>, Void, Response<User>>() {
     companion object {
         val TAG = "LOGIN_DATA_SOURCE"
     }
-    fun login(host: String, username: String, password: String, callback: Callback<User>) {
+    fun login(host: String, username: String, password: String, callback: Callback<Token>) {
         // TODO: handle loggedInUser authentication
         // TODO: Auth auslagern.
         val client = OkHttpClient.Builder()
@@ -31,7 +30,7 @@ class LoginDataSource : AsyncTask<Array<String>, Void, Response<User>>() {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(MocapService::class.java)
-        val call = request.login()
+        val call = request.authorize()
         call.enqueue(callback)
     }
 

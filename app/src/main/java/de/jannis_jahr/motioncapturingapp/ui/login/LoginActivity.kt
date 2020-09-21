@@ -40,6 +40,13 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
         loginViewModel = ViewModelProviders.of(this, LoginViewModelFactory())
             .get(LoginViewModel::class.java)
 
+        // Give context
+        loginViewModel.context = applicationContext
+        if(loginViewModel.login()) {
+            loading.visibility = View.VISIBLE
+        }
+
+
         loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
             val loginState = it ?: return@Observer
 

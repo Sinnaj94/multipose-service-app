@@ -3,12 +3,17 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="next">Next</string>
+    <string name="redo">Redo</string>
+    <string name="analyse">Analyse</string>
+    <string name="cancel">Cancel</string>
+    <string name="prompt_hold_to_record_video">Hold to record a video</string>
     <string name="previous">Previous</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_home">Feed</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_add">Add</string>
-    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_login">Login</string>
+    <string name="action_logout">Logout</string>
     <string name="prompt_user">Username</string>
     <string name="prompt_server_address">Server Address</string>
     <string name="prompt_password">Password</string>
@@ -20,8 +25,10 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="network_error">Network error</string>
+    <string name="error">Error</string>
     <string name="search_server">Search server in local network</string>
     <string name="searching_for_server">Searching server…</string>
     <string name="server_not_found">Server not found.</string>
     <string name="server_found">Server discovered.</string>
+    <string name="video_upload_success">Video successfully uploaded</string>
 </resources>
