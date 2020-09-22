@@ -1,16 +1,13 @@
-package de.jannis_jahr.motioncapturingapp.ui.dashboard
+package de.jannis_jahr.motioncapturingapp.ui.jobs
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
-import de.jannis_jahr.motioncapturingapp.network.services.helpers.HostnameSharedPreferenceLiveData
-import de.jannis_jahr.motioncapturingapp.network.services.helpers.TokenSharedPreferenceLiveData
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import okhttp3.OkHttpClient
 import retrofit2.Call
@@ -18,9 +15,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.reflect.KProperty
 
-class DashboardViewModel(private val sharedPreferences : SharedPreferences) : ViewModel() {
+class JobsViewModel(private val sharedPreferences : SharedPreferences, private val resultCode : Int) : ViewModel(){
 
     companion object {
         const val TAG = "DASHBOARD_VIEW_MODEL"
@@ -56,7 +52,7 @@ class DashboardViewModel(private val sharedPreferences : SharedPreferences) : Vi
             .build()
             .create(MocapService::class.java)
 
-        val call = request.getJobs()
+        val call = request.getJobs(resultCode)
 
         call.enqueue(object: Callback<List<Job>> {
             override fun onResponse(call: Call<List<Job>>, response: Response<List<Job>>) {
@@ -69,8 +65,10 @@ class DashboardViewModel(private val sharedPreferences : SharedPreferences) : Vi
 
             override fun onFailure(call: Call<List<Job>>, t: Throwable) {
                 isRefreshing.value = false
+                t.printStackTrace()
             }
 
         })
     }
+
 }

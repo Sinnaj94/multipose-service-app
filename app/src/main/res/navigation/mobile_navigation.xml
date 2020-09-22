@@ -12,15 +12,16 @@
             tools:layout="@layout/fragment_home"/>
 
     <fragment
-            android:id="@+id/navigation_add"
-            android:name="de.jannis_jahr.motioncapturingapp.ui.add.AddFragment"
-            android:label="@string/title_add"
-            tools:layout="@layout/fragment_add"/>
-
-    <fragment
             android:id="@+id/navigation_dashboard"
             android:name="de.jannis_jahr.motioncapturingapp.ui.dashboard.DashboardFragment"
             android:label="@string/title_dashboard"
             tools:layout="@layout/fragment_dashboard"/>
+
+
+    <fragment
+            android:id="@+id/navigation_user"
+            android:name="de.jannis_jahr.motioncapturingapp.ui.user.UserFragment"
+            android:label="@string/title_user"
+            tools:layout="@layout/fragment_user"/>
 
 </navigation>

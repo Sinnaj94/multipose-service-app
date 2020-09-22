@@ -31,4 +31,11 @@
     <string name="server_not_found">Server not found.</string>
     <string name="server_found">Server discovered.</string>
     <string name="video_upload_success">Video successfully uploaded</string>
+    <string name="send">Send</string>
+    <string name="work_title">Working Title</string>
+    <string name="title_user">User</string>
+    <string name="upload_video_from_gallery">Upload from gallery</string>
+    <string name="record_video">Record video</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

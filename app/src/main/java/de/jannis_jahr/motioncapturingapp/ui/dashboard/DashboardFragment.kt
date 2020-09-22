@@ -1,66 +1,119 @@
 package de.jannis_jahr.motioncapturingapp.ui.dashboard
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.ListView
-import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.github.clans.fab.FloatingActionButton
+import com.github.clans.fab.FloatingActionMenu
 import de.jannis_jahr.motioncapturingapp.R
-import de.jannis_jahr.motioncapturingapp.network.services.helpers.HostnameSharedPreferenceLiveData
-import de.jannis_jahr.motioncapturingapp.network.services.helpers.TokenSharedPreferenceLiveData
+import de.jannis_jahr.motioncapturingapp.SendJobActivity
+import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
+import de.jannis_jahr.motioncapturingapp.ui.adapters.MyPagerAdapter
+import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsViewModel
 import kotlinx.android.synthetic.main.fragment_dashboard.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
 
-class DashboardFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
-    private lateinit var dashboardViewModel: DashboardViewModel
-    private lateinit var jobList : ListView
+class DashboardFragment : Fragment() {
+
+    private val TAG = "JOBS"
+    private val VIDEO_CODE = 1
+    private val SEND_CODE = 2
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val sharedPrefs = context!!.getSharedPreferences(
-            ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
-        )
-        dashboardViewModel = DashboardViewModel(sharedPrefs)
+
             //ViewModelProviders.of(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
+
+        val floatingMenu : FloatingActionMenu = root.findViewById(R.id.floating_action_menu)
+
+        val record : FloatingActionButton = root.findViewById(R.id.record_video)
+        val upload : FloatingActionButton = root.findViewById(R.id.upload_video)
+
+        record.setOnClickListener {
+            floatingMenu.close(true)
+            if (context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)!!) { // First check if camera is available in the device
+                val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                startActivityForResult(intent, VIDEO_CODE);
+            }
+        }
+
+        upload.setOnClickListener {
+            floatingMenu.close(true)
+            val intent = Intent()
+            intent.type = "video/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(Intent.createChooser(intent, "Select Video"), VIDEO_CODE)
+        }
 
 
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        jobList = view.findViewById<ListView>(R.id.job_list)
+        val fragmentAdapter = MyPagerAdapter(fragmentManager!!)
+        viewpager_main.adapter = fragmentAdapter
+        tabs.setupWithViewPager(viewpager_main)
+    }
 
-        val adapter = JobsAdapter(context!!, R.layout.list_item_jobs, arrayListOf())
-        jobList.adapter = adapter
-        dashboardViewModel.getJobs().observe(viewLifecycleOwner, Observer {
-            adapter.clear()
-            adapter.addAll(it)
-        })
+    private fun uploadVideo(service: MocapService, file: File, id: String) {
+        //val video = RequestBody.create("video/mp4", )
+        val video_file = RequestBody.create(MediaType.parse("video/mp4"), file)
+        val body = MultipartBody.Part.createFormData("video", file.name, video_file)
 
-        pull_to_refresh.setOnRefreshListener(this)
+        val call = service.uploadJob(id, body)
 
-        dashboardViewModel.isRefreshing.observe(viewLifecycleOwner, Observer {
-            pull_to_refresh.isRefreshing = it
+        call.enqueue(object : Callback<Job> {
+
+            override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                if(response.code() == 200) {
+                    Toast.makeText(context, R.string.video_upload_success, Toast.LENGTH_SHORT).show()
+                    // Finish and set Result to Okay
+                    //setResult(Activity.RESULT_OK)
+                    //finish()
+                } else {
+                    Toast.makeText(context, R.string.error, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Job>, t: Throwable) {
+                Toast.makeText(context, R.string.network_error, Toast.LENGTH_SHORT).show()
+                t.printStackTrace()
+            }
+
         })
     }
 
-    override fun onRefresh() {
-        dashboardViewModel.loadJobs()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == VIDEO_CODE && resultCode == Activity.RESULT_OK) {
+            Toast.makeText(context, "Welcome sir", Toast.LENGTH_SHORT).show()
+            val sendJob = Intent(context, SendJobActivity::class.java)
+            sendJob.data = data!!.data
+            startActivityForResult(sendJob, SEND_CODE)
+        } else if(requestCode == SEND_CODE && resultCode == Activity.RESULT_OK) {
+
+        }
     }
-
-
 }

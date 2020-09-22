@@ -1,9 +1,11 @@
 package de.jannis_jahr.motioncapturingapp
 
-import android.content.Intent
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -26,26 +28,47 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_add
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_user
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.navigation_add -> hideBottomNav()
-                else -> showBottomNav()
+        askExternalStoragePermission()
+    }
+
+    fun askExternalStoragePermission() {
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Explain to the user why we need to read the contacts
             }
+
+            requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 0)
+
+            // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
+            // app-defined int constant that should be quite unique
+
+            return;
         }
     }
 
-    private fun showBottomNav() {
+    private fun showNavigation() {
+        supportActionBar?.show()
+
         nav_view.visibility = View.VISIBLE
     }
 
-    private fun hideBottomNav() {
+    private fun hideNavigation() {
         nav_view.visibility = View.GONE
+        supportActionBar?.hide()
+
+
+        window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -1,8 +1,13 @@
 package de.jannis_jahr.motioncapturingapp.network.services.model
 
+import java.util.*
+
 data class Job (
-    val id: String,
-    val user_id: String,
+    val id: UUID,
+    val name: String,
+    val video_uploaded: Boolean,
     val date_updated: String,
-    val results: Array<Result>
+    val input_video_url: String,
+    val thumbnail_url: String,
+    val result: Result
 )

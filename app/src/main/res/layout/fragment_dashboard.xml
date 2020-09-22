@@ -6,29 +6,45 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.dashboard.DashboardFragment">
-
-    <TextView
-            android:id="@+id/text_dashboard"
+    <com.google.android.material.tabs.TabLayout
+            app:layout_constraintTop_toTopOf="parent"
+            android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:layout_width="match_parent"
-                                                           android:id="@+id/pull_to_refresh"
-                                                           app:layout_constraintTop_toTopOf="parent"
-                                                           android:layout_height="wrap_content">
-        <ListView android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  tools:listitem="@layout/list_item_jobs"
-                  android:id="@+id/job_list"
+            app:tabMode="fixed"
+            android:minHeight="?attr/actionBarSize"
+            />
+    <androidx.viewpager.widget.ViewPager android:layout_width="match_parent"
+                                         android:layout_height="0dp"
+                                         android:id="@+id/viewpager_main"
+                                         app:layout_constraintTop_toBottomOf="@id/tabs"
+                                        app:layout_constraintBottom_toBottomOf="parent"
+    >
+
+    </androidx.viewpager.widget.ViewPager>
+
+    <com.github.clans.fab.FloatingActionMenu
+            android:src="@drawable/ic_baseline_add_24"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true" android:id="@+id/floating_action_menu"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="16dp" android:focusable="true">
+        <com.github.clans.fab.FloatingActionButton android:layout_width="wrap_content"
+                                                   android:layout_height="wrap_content"
+                                                   app:fabSize="mini"
+                                                   android:id="@+id/record_video"
+                                                   app:fab_label="@string/record_video"
+                                                   android:src="@drawable/ic_baseline_videocam_24"
+                />
+        <com.github.clans.fab.FloatingActionButton android:layout_width="wrap_content"
+                                                   android:layout_height="wrap_content"
+                                                   app:fabSize="mini"
+                                                   android:id="@+id/upload_video"
+                                                   app:fab_label="@string/upload_video_from_gallery"
+                                                   android:src="@drawable/ic_baseline_cloud_upload_24"
         />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </com.github.clans.fab.FloatingActionMenu>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

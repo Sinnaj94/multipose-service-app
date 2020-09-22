@@ -5,10 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import de.jannis_jahr.motioncapturingapp.R
+import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthorization
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 
 class JobsAdapter(
@@ -18,20 +21,51 @@ class JobsAdapter(
     var list: ArrayList<Job>
     var vi: LayoutInflater
 
+    internal class ViewHolder(view: View?) {
+        var image : ImageView? = view?.findViewById(R.id.thumbnail)
+        var date : TextView? = view?.findViewById(R.id.job_date)
+        var name : TextView? = view?.findViewById(R.id.job_name)
+        var result : TextView? = view?.findViewById(R.id.job_status)
+    }
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        var retView: View
+        val holder: ViewHolder
+        val rowView: View?
 
         if(convertView == null) {
-            retView = vi.inflate(resource, null)
-            retView.findViewById<TextView>(R.id.job_date).text = list[position].date_updated
-            retView.findViewById<TextView>(R.id.job_name).text = list[position].id
-            // TODO: Results index 0 ?
-            retView.findViewById<TextView>(R.id.job_status).text = list[position].results[0].result_code
+            rowView = vi.inflate(resource, null)
+            holder = ViewHolder(rowView)
+            rowView.tag = holder
         } else {
-            retView = convertView
+            rowView = convertView
+            holder = rowView.tag as ViewHolder
         }
 
-        return retView
+        holder.date?.text = list[position].date_updated
+        holder.name?.text = list[position].name
+        holder.result?.text = list[position].result.result_code.toString()
+        if(list[position].video_uploaded) {
+            bindImage(position, holder.image!!)
+        }
+        return rowView!!
+    }
+    
+    fun bindImage(position: Int, thumb: ImageView) {
+        val sharedPreferences = context.getSharedPreferences("users", Context.MODE_PRIVATE)
+        val token = sharedPreferences.getString("token", "")
+        val host = sharedPreferences.getString("hostname", "")
+        val thumbnailPath = host + list[position].thumbnail_url
+        val fullThumbnailUrl = GlideUrl(
+            thumbnailPath,
+            LazyHeaders.Builder()
+                .addHeader("Authorization", BasicAuthorization(token,"").buildHeader()!!)
+                .build()
+        )
+
+        Glide
+            .with(context)
+            .load(fullThumbnailUrl)
+            .into(thumb)
     }
 
     init {
