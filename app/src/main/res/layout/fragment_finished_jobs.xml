@@ -3,6 +3,7 @@
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+             android:id="@+id/frame_layout"
              tools:context=".ui.jobs.JobsListFragment">
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:layout_width="match_parent"
                                                            android:id="@+id/pull_refresh"

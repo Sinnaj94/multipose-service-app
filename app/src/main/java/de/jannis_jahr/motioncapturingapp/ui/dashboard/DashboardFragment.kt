@@ -4,25 +4,27 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.SendJobActivity
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
-import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
 import de.jannis_jahr.motioncapturingapp.ui.adapters.MyPagerAdapter
-import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsViewModel
+import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsListFragment
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
+import de.jannis_jahr.motioncapturingapp.utils.RealPathUtil
 import kotlinx.android.synthetic.main.fragment_dashboard.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody
@@ -78,8 +80,9 @@ class DashboardFragment : Fragment() {
         tabs.setupWithViewPager(viewpager_main)
     }
 
-    private fun uploadVideo(service: MocapService, file: File, id: String) {
+    private fun uploadVideo(service: MocapService, uri: Uri, id: String) {
         //val video = RequestBody.create("video/mp4", )
+        val file = File(RealPathUtil.getRealPath(context, uri))
         val video_file = RequestBody.create(MediaType.parse("video/mp4"), file)
         val body = MultipartBody.Part.createFormData("video", file.name, video_file)
 
@@ -113,7 +116,9 @@ class DashboardFragment : Fragment() {
             sendJob.data = data!!.data
             startActivityForResult(sendJob, SEND_CODE)
         } else if(requestCode == SEND_CODE && resultCode == Activity.RESULT_OK) {
-
+            // Send video
+            val service = NetworkUtils.getService(context!!.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+            uploadVideo(service!!, data!!.data!!, data.getStringExtra("id")!!)
         }
     }
 }

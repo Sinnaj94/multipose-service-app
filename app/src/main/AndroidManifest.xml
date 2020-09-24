@@ -16,6 +16,8 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
+        <activity android:name="de.jannis_jahr.motioncapturingapp.ui.detail.JobDetailActivity">
+        </activity>
         <activity android:name=".SendJobActivity">
         </activity>
         <activity
@@ -24,6 +26,7 @@
                 android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>

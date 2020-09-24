@@ -3,7 +3,7 @@ package de.jannis_jahr.motioncapturingapp.network
 import android.util.Log
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.ServiceBuilder
-import de.jannis_jahr.motioncapturingapp.network.services.model.Status
+import de.jannis_jahr.motioncapturingapp.network.services.model.APIStatus
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -52,8 +52,8 @@ class NetworkDiscovery : Runnable {
 
         val call = request.getStatus()
 
-        call.enqueue(object : Callback<Status>{
-            override fun onResponse(call: Call<Status>, response: Response<Status>) {
+        call.enqueue(object : Callback<APIStatus>{
+            override fun onResponse(call: Call<APIStatus>, response: Response<APIStatus>) {
                 if (response.isSuccessful){
                     // Notify listener
                     if(response.body()?.id == id) {
@@ -62,7 +62,7 @@ class NetworkDiscovery : Runnable {
                     }
                 }
             }
-            override fun onFailure(call: Call<Status>, t: Throwable) {
+            override fun onFailure(call: Call<APIStatus>, t: Throwable) {
                 Log.d(TAG,"Failure")
             }
         })

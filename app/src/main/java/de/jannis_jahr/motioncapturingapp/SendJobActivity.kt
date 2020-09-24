@@ -12,6 +12,8 @@ import android.widget.Toast
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
+import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import de.jannis_jahr.motioncapturingapp.utils.RealPathUtil
 import kotlinx.android.synthetic.main.activity_send_job.*
 import okhttp3.MediaType
@@ -37,28 +39,9 @@ class SendJobActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun getService(host: String, token: String) : MocapService {
-        val client = OkHttpClient.Builder()
-                        .addInterceptor(BasicAuthInterceptor(token, ""))
-                        .build()
-        return Retrofit.Builder()
-            .baseUrl(host)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MocapService::class.java)
-    }
-
     private fun send() {
-        val sp= applicationContext.getSharedPreferences("users", Context.MODE_PRIVATE)
-
-        val token= sp?.getString("token", null)
-        val host = sp?.getString("hostname", null)
-
-        if(token != null && host != null) {
-            val service = getService(host, token)
-            fullUploadJob(service, fileURI!!)
-        }
+        val service = NetworkUtils.getService(applicationContext.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+        fullUploadJob(service!!, fileURI!!)
     }
 
     private fun fullUploadJob(service: MocapService, file: Uri) {
@@ -77,7 +60,7 @@ class SendJobActivity : AppCompatActivity() {
                 if(response.code() == 200) {
                     val intent = Intent()
                     intent.putExtra("id", response.body()?.id.toString())
-                    intent.data = fileURI
+                    intent.data = file
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 }

@@ -10,4 +10,11 @@ data class Job (
     val input_video_url: String,
     val thumbnail_url: String,
     val result: Result
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if(other is Job) {
+            return id == other.id
+        }
+        return false
+    }
+}

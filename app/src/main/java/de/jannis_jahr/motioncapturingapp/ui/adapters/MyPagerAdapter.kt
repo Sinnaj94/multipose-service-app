@@ -8,7 +8,7 @@ import de.jannis_jahr.motioncapturingapp.ui.jobs.FinishedJobsFragment
 import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsListFragment
 import de.jannis_jahr.motioncapturingapp.ui.jobs.PendingJobsFragment
 
-class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     override fun getCount(): Int {
         return 3
     }
