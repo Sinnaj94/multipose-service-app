@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:fancy="http://schemas.android.com/apk/res-auto"
           package="de.jannis_jahr.motioncapturingapp">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -7,7 +8,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-
+    <!-- TODO: Remove cleartext traffic -->
     <application
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
@@ -16,17 +17,21 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
-        <activity android:name="de.jannis_jahr.motioncapturingapp.ui.detail.JobDetailActivity">
+        <activity
+                android:name=".IntroActivity"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen">
+        </activity>
+        <activity android:name=".ui.detail.JobDetailActivity">
         </activity>
         <activity android:name=".SendJobActivity">
         </activity>
         <activity
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
                 android:name=".ui.login.LoginActivity"
                 android:label="@string/app_name"
                 android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -40,6 +45,10 @@
                 android:label="@string/app_name"
                 android:theme="@style/FullscreenTheme">
         </activity>
+
+        <meta-data
+                android:name="preloaded_fonts"
+                android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

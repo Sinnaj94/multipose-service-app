@@ -1,9 +1,12 @@
 package de.jannis_jahr.motioncapturingapp
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +15,10 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.ui.login.LoginActivity
 import de.jannis_jahr.motioncapturingapp.ui.observers.AddVideoObserver
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -35,6 +41,16 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
         navView.setupWithNavController(navController)
 
         askExternalStoragePermission()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.logout) {
+            NetworkUtils.logout(getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+            finish()
+            val i = Intent(applicationContext, LoginActivity::class.java)
+            startActivity(i)
+        }
+        return true
     }
 
     fun askExternalStoragePermission() {

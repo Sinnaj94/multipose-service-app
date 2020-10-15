@@ -1,5 +1,6 @@
 package de.jannis_jahr.motioncapturingapp.ui.detail
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
@@ -8,12 +9,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.navigation.fragment.navArgs
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.ui.view.ScalableVideoView
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import retrofit2.Call
 import retrofit2.Callback
@@ -25,6 +30,7 @@ open class DetailVideo : Fragment() {
     // TODO: Rename and change types of parameters
     private var id: String? = null
     val instanceType = this
+
     lateinit var prefs : SharedPreferences
     private lateinit var service : MocapService
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +38,7 @@ open class DetailVideo : Fragment() {
         arguments?.let {
             id = it.getString(ARG_ID)
         }
-        prefs = context!!.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE)
+        prefs = requireContext().getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE)
         service = NetworkUtils.getService(prefs)!!
     }
 
@@ -52,17 +58,18 @@ open class DetailVideo : Fragment() {
         call.enqueue(object : Callback<Job> {
             override fun onResponse(call: Call<Job>, response: Response<Job>) {
                 if(response.code() == 200) {
-                    view.findViewById<TextView>(R.id.job_title).text = response.body()!!.name
                     val myVideoURL : String =
-                    if(instanceType is DetailSourceVideo) {
                         response.body()!!.input_video_url
-                    } else {
-                        response.body()!!.result.output_video_url
-                    }
                     val uri = Uri.parse(prefs.getString("hostname", "") + myVideoURL)
                     val videoHolder = view.findViewById<VideoView>(R.id.video_view)
                     videoHolder.setVideoURI(uri)
-                    videoHolder.start()
+                    videoHolder.setOnPreparedListener {
+                        view.findViewById<ProgressBar>(R.id.spinner)
+                        videoHolder.start()
+                        videoHolder.requestLayout()
+                        videoHolder.invalidate()
+                        it.isLooping = true
+                    }
                 }
             }
 
@@ -73,21 +80,29 @@ open class DetailVideo : Fragment() {
         })
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(id: String) =
-            DetailSourceVideo().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_ID, id)
-                }
-            }
+}
+
+class DetailHTMLView : Fragment() {
+    private var id: String? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            id = it.getString(ARG_ID)
+        }
     }
-}
 
-class DetailSourceVideo : DetailVideo() {
-
-}
-
-class DetailOutputVideo : DetailVideo() {
-
+    @SuppressLint("SetJavaScriptEnabled")
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        val view = inflater.inflate(R.layout.fragment_detail_output_video, container, false)
+        val webView = view.findViewById<WebView>(R.id.web_view)
+        webView.settings.javaScriptEnabled = true
+        val host = NetworkUtils.getHost(requireContext().getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+        webView.loadUrl("$host${ApplicationConstants.BASE_ROUTE}results/$id/render_html")
+        webView.reload()
+        return view
+    }
 }

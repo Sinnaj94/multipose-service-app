@@ -4,6 +4,7 @@ import android.util.Log
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.ServiceBuilder
 import de.jannis_jahr.motioncapturingapp.network.services.model.APIStatus
+import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,9 +46,10 @@ class NetworkDiscovery : Runnable {
     private fun validateNetwork(adr: InetSocketAddress): Boolean {
         // TODO: Persist the address on connect.
         val host = "http:/${adr.address}:${adr.port}"
+        val fullHost = "${host}${ApplicationConstants.BASE_ROUTE}"
 
-        ServiceBuilder.buildRetrofit(host)
-        Log.d(TAG, "Host: $host")
+        ServiceBuilder.buildRetrofit(fullHost)
+        Log.d(TAG, "Host: $fullHost")
         val request = ServiceBuilder.buildService(MocapService::class.java)
 
         val call = request.getStatus()

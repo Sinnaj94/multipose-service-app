@@ -9,6 +9,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils.Companion.getService
 import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,20 +40,9 @@ class JobsViewModel(private val sharedPreferences : SharedPreferences, private v
     public fun loadJobs() {
         isRefreshing.value = true
         // Do an asynchronous operation to fetch users.
-        // Get the token
-        val token = sharedPreferences.getString("token", "")
-        val host = sharedPreferences.getString("hostname", "")
-        val client = OkHttpClient.Builder()
-            .addInterceptor(BasicAuthInterceptor(token!!, ""))
-            .build()
-        val request = Retrofit.Builder()
-            .baseUrl(host!!)
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(MocapService::class.java)
+        val request = getService(sharedPreferences)
 
-        val call = request.getJobs(resultCode)
+        val call = request!!.getJobs(resultCode)
 
         call.enqueue(object: Callback<List<Job>> {
             override fun onResponse(call: Call<List<Job>>, response: Response<List<Job>>) {

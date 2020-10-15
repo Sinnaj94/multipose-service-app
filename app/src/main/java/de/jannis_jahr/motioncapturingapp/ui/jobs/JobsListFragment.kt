@@ -34,7 +34,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val sharedPrefs = context!!.getSharedPreferences(
+        val sharedPrefs = requireContext().getSharedPreferences(
             ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
         jobsViewModel = JobsViewModel(sharedPrefs, resultCode)
@@ -48,7 +48,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         jobList = view.findViewById<ListView>(R.id.job_list)
         myJobs = arrayListOf<JobViewHolder>()
-        val adapter = JobsAdapter(context!!, R.layout.list_item_jobs, myJobs)
+        val adapter = JobsAdapter(requireContext(), R.layout.list_item_jobs, myJobs)
         jobList.adapter = adapter
         jobsViewModel.getJobs().observe(viewLifecycleOwner, { item ->
             // Remove the handlers
@@ -57,7 +57,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
             // Add all jobs
             myJobs.addAll(item.map { JobViewHolder(it) })
             adapter.notifyDataSetChanged()
-        })
+        } )
 
         pull_refresh.setOnRefreshListener(this)
 

@@ -2,25 +2,58 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/mobile_navigation"
-            app:startDestination="@+id/navigation_output_video">
+            android:id="@+id/mobile_navigation_detail"
+            app:startDestination="@+id/navigation_source_video">
 
     <fragment
             android:id="@+id/navigation_source_video"
-            android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailSourceVideo"
+            android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailVideo"
             android:label="@string/source_video"
-            tools:layout="@layout/fragment_home"/>
+            tools:layout="@layout/fragment_detail_source_video">
+        <argument
+                android:name="id"
+                app:argType="string"
+                />
+        <action
+                android:id="@+id/action_navigation_source_video_to_navigation_operations"
+                app:destination="@id/navigation_operations" />
+        <action
+                android:id="@+id/action_navigation_source_video_to_navigation_output_video"
+                app:destination="@id/navigation_output_video" />
+    </fragment>
 
     <fragment
             android:id="@+id/navigation_output_video"
-            android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailOutputVideo"
+            android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailHTMLView"
             android:label="@string/output_video"
-            tools:layout="@layout/fragment_dashboard"/>
+            tools:layout="@layout/fragment_detail_output_video">
+        <argument
+                android:name="id"
+                app:argType="string"
+                />
+        <action
+                android:id="@+id/action_navigation_output_video_to_navigation_source_video"
+                app:destination="@id/navigation_source_video" />
+        <action
+                android:id="@+id/action_navigation_output_video_to_navigation_operations"
+                app:destination="@id/navigation_operations" />
+    </fragment>
 
     <fragment
             android:id="@+id/navigation_operations"
             android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailOperations"
             android:label="@string/operations"
-            tools:layout="@layout/fragment_user"/>
+            tools:layout="@layout/fragment_detail_operations">
+        <argument
+                android:name="id"
+                app:argType="string"
+                />
+        <action
+                android:id="@+id/action_navigation_operations_to_navigation_source_video"
+                app:destination="@id/navigation_source_video" />
+        <action
+                android:id="@+id/action_navigation_operations_to_navigation_output_video"
+                app:destination="@id/navigation_output_video" />
+    </fragment>
 
 </navigation>

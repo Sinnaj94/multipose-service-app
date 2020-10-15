@@ -10,6 +10,7 @@ import de.jannis_jahr.motioncapturingapp.data.LoginRepository
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.data.model.LoggedInUser
 import de.jannis_jahr.motioncapturingapp.network.services.model.Token
+import de.jannis_jahr.motioncapturingapp.network.services.model.User
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -21,7 +22,18 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     var context: Context? = null
 
     private val _loginResult = MutableLiveData<LoginResult>()
+    private val _registrationResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
+    val registrationResult: LiveData<LoginResult> = _registrationResult
+
+    fun tokenExists(): Boolean {
+        context?.let {
+            if(loginRepository.loadConnection(it)) {
+                return true
+            }
+        }
+        return false
+    }
 
     fun login(): Boolean {
         context?.let {
@@ -34,7 +46,7 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         return false
     }
 
-    fun getCallback(host: String) : Callback<Token> {
+    private fun getCallback(host: String) : Callback<Token> {
         return object: Callback<Token> {
             override fun onResponse(call: Call<Token>, response: Response<Token>) {
                 if(response.isSuccessful) {
@@ -54,6 +66,22 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
         }
     }
 
+    fun getRegistrationCallback() : Callback<User> {
+        return object: Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                if(response.code() == 200) {
+                    _registrationResult.value = LoginResult(success = LoggedInUserView(displayName = response.body()!!.username))
+                } else {
+                    _registrationResult.value = LoginResult(error = R.string.user_exists)
+                }
+            }
+
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                _registrationResult.value = LoginResult(error = R.string.network_error)
+            }
+        }
+    }
+
     fun login(host: String, username: String, password: String) {
 
         loginRepository.login(host, username, password, getCallback(host))
@@ -61,15 +89,7 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 
     fun register(host: String, username: String, password: String) {
         // can be launched in a separate asynchronous job
-        /*val result = loginRepository.register(host, username, password)
-
-        if (result is Result.Success<*>) {
-            TODO()
-            //_loginResult.value = LoginResult(success = LoggedInUserView(displayName = result.data.displayName))
-        } else {
-            TODO()
-            //_loginResult.value = LoginResult(error = R.string.login_failed)
-        }*/
+        loginRepository.register(host, username, password, getRegistrationCallback())
     }
 
     fun loginDataChanged(username: String, password: String) {
@@ -84,15 +104,12 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 
     // A placeholder username validation check
     private fun isUserNameValid(username: String): Boolean {
-        return if (username.contains('@')) {
-            Patterns.EMAIL_ADDRESS.matcher(username).matches()
-        } else {
-            username.isNotBlank()
-        }
+        return username.length >= 5
+
     }
 
     // A placeholder password validation check
     private fun isPasswordValid(password: String): Boolean {
-        return password.length > 5
+        return password.length >= 5
     }
 }

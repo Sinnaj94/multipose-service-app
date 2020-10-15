@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Motion Capturing App</string>
+    <string name="app_name">mocAPP</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="next">Next</string>
@@ -17,13 +17,14 @@
     <string name="prompt_user">Username</string>
     <string name="prompt_server_address">Server Address</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_or_register">Sign in or register</string>
     <string name="action_register">Register</string>
-    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="welcome">"Welcome !"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="user_exists">"User already exists"</string>
     <string name="network_error">Network error</string>
     <string name="error">Error</string>
     <string name="search_server">Search server in local network</string>
@@ -41,4 +42,18 @@
     <string name="source_video">Source Video</string>
     <string name="output_video">Output Video</string>
     <string name="operations">Operations</string>
+
+
+    <string name="onboarding_1_title">Welcome!</string>
+    <string name="onboarding_1_text">With this app you can easily create Motion Capturing data from videos</string>
+
+    <string name="onboarding_2_title">How it works</string>
+    <string name="onboarding_2_text">Just take a video and upload it! Please make sure there is only one person in the videos!</string>
+
+    <string name="onboarding_3_title">That\'s it!</string>
+    <string name="onboarding_3_text">Now it\'s time to experiment.</string>
+    <string name="no_posts">No posts</string>
+    <string name="no_posts_detail">That\'s strange… Nobody has posted anything yet…</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="new_user_register_now">New user? Register Now</string>
 </resources>

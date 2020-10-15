@@ -10,8 +10,9 @@ interface MocapService {
     @GET("status/")
     fun getStatus() : Call<APIStatus>
 
+    @Multipart
     @POST("users/")
-    fun register() : Call<User>
+    fun register(@Part("username") username : RequestBody, @Part("password") password : RequestBody) : Call<User>
 
     @GET("users/{id}")
     fun getUser() : Call<User>

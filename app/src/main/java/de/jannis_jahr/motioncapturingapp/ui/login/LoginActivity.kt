@@ -1,6 +1,7 @@
 package de.jannis_jahr.motioncapturingapp.ui.login
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -16,10 +17,13 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.snackbar.Snackbar
+import de.jannis_jahr.motioncapturingapp.IntroActivity
 import de.jannis_jahr.motioncapturingapp.MainActivity
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.NetworkDiscoveryListener
 import de.jannis_jahr.motioncapturingapp.network.NetworkDiscovery
+import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import kotlinx.android.synthetic.main.activity_login.*
 
 
@@ -28,6 +32,11 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
     private lateinit var loginViewModel: LoginViewModel
     var discovery : NetworkDiscovery? = null
     override fun onCreate(savedInstanceState: Bundle?) {
+        val prefs = getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE)
+        if(!prefs.getBoolean(ApplicationConstants.PREFERENCE_INTRO_FINISHED, false)) {
+            val i = Intent(applicationContext, IntroActivity::class.java)
+            startActivity(i)
+        }
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_login)
@@ -37,14 +46,22 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
         val login = findViewById<Button>(R.id.login)
         val loading = findViewById<ProgressBar>(R.id.loading)
 
+        server_address.setText(getSharedPreferences(ApplicationConstants.PREFERENCES, MODE_PRIVATE)
+            .getString("hostname", ""))
+
+
+
         loginViewModel = ViewModelProviders.of(this, LoginViewModelFactory())
             .get(LoginViewModel::class.java)
 
         // Give context
         loginViewModel.context = applicationContext
-        if(loginViewModel.login()) {
+        if(loginViewModel.tokenExists()) {
             loading.visibility = View.VISIBLE
+            loginViewModel.login()
         }
+        login.isEnabled = false
+        register.isEnabled = false
 
 
         loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
@@ -52,6 +69,7 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
 
             // disable login button unless both username / password is valid
             login.isEnabled = loginState.isDataValid
+            register.isEnabled = loginState.isDataValid
 
             if (loginState.usernameError != null) {
                 username.error = getString(loginState.usernameError)
@@ -74,7 +92,21 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
             setResult(Activity.RESULT_OK)
 
             //Complete and destroy login activity once successful
+        })
 
+        loginViewModel.registrationResult.observe(this@LoginActivity, Observer {
+            val registrationResult = it?:return@Observer
+
+            loading.visibility = View.GONE
+            register.isEnabled = true
+
+            if(registrationResult.error != null) {
+                showRegistrationFailed(registrationResult.error)
+            }
+            if(registrationResult.success != null) {
+                val snackbar = Snackbar.make(container, "Registered user ${registrationResult.success.displayName}.", Snackbar.LENGTH_SHORT)
+                snackbar.show()
+            }
         })
 
         username.afterTextChanged {
@@ -108,6 +140,12 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
                 loading.visibility = View.VISIBLE
                 loginViewModel.login(server_address.text.toString(), username.text.toString(), password.text.toString())
             }
+
+            register.setOnClickListener {
+                loading.visibility = View.VISIBLE
+                register.isEnabled = false
+                loginViewModel.register(server_address.text.toString(), username.text.toString(), password.text.toString())
+            }
         }
 
         // Search server
@@ -120,9 +158,16 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
         }
     }
 
+    private fun showRegistrationFailed(error: Int) {
+        val snackbar = Snackbar.make(container, "Registration failed.", Snackbar.LENGTH_SHORT)
+        snackbar.show()
+    }
+
     private fun startServerDiscovery() {
         Toast.makeText(this, R.string.searching_for_server, Toast.LENGTH_SHORT).show()
+        server_address.setText("")
         server_address.hint = getString(R.string.searching_for_server)
+        server_address.isEnabled = false
         // Suspend old task
         discovery?.running = false
         // Create thread.
@@ -136,6 +181,7 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
 
     private fun stopServerDiscovery() {
         discovery?.running = false
+        server_address.isEnabled = true
         server_state.visibility = View.GONE
         search_progress.visibility = View.GONE
         server_address.isEnabled = true
@@ -143,14 +189,6 @@ class LoginActivity : AppCompatActivity(), NetworkDiscoveryListener {
     }
 
     private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome)
-        val displayName = model.displayName
-        // TODO : initiate successful logged in experience
-        Toast.makeText(
-            applicationContext,
-            "$welcome $displayName",
-            Toast.LENGTH_LONG
-        ).show()
         startActivity(Intent(this, MainActivity::class.java))
     }
 

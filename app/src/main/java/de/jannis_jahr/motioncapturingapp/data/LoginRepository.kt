@@ -40,22 +40,24 @@ class LoginRepository(val dataSource: LoginDataSource) {
         val result = dataSource.login(host, token, "", callback)
     }
 
-    fun register(host: String, username: String, password: String) {
+    fun register(host: String, username: String, password: String, callback: Callback<User>) {
         // handle login
-
+        dataSource.register(host, username, password, callback)
     }
 
     private fun getSharedPrefs(context: Context): SharedPreferences? {
         return context.getSharedPreferences("users", Context.MODE_PRIVATE)
     }
 
-    public fun loadConnection(context: Context) {
+    public fun loadConnection(context: Context) : Boolean {
         val prefs = getSharedPrefs(context)
         val token= prefs?.getString("token", null)
         val host = prefs?.getString("hostname", null)
         if(token != null && host != null) {
             user = LoggedInUser(token, host)
+            return true
         }
+        return false
     }
 
     public fun setConnection(user: LoggedInUser, context: Context) {
