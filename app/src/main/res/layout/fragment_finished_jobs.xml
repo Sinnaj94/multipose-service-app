@@ -8,11 +8,13 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:layout_width="match_parent"
                                                            android:id="@+id/pull_refresh"
                                                            android:layout_height="wrap_content">
-        <ListView android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  tools:listitem="@layout/list_item_jobs"
-                  android:id="@+id/job_list"
-        />
+
+        <ListView
+            android:id="@+id/job_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@drawable/empty_tall_divider"
+            tools:listitem="@layout/list_item_jobs" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </FrameLayout>

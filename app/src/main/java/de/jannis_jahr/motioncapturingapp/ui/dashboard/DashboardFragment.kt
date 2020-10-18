@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,8 +46,7 @@ class DashboardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-            //ViewModelProviders.of(this).get(DashboardViewModel::class.java)
+        //ViewModelProviders.of(this).get(DashboardViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
         val floatingMenu : FloatingActionMenu = root.findViewById(R.id.floating_action_menu)
@@ -75,9 +75,9 @@ class DashboardFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val fragmentAdapter = MyPagerAdapter(fragmentManager!!)
+        /*val fragmentAdapter = MyPagerAdapter(childFragmentManager)
         viewpager_main.adapter = fragmentAdapter
-        tabs.setupWithViewPager(viewpager_main)
+        tabs.setupWithViewPager(viewpager_main)*/
     }
 
     private fun uploadVideo(service: MocapService, uri: Uri, id: String) {
@@ -117,7 +117,7 @@ class DashboardFragment : Fragment() {
             startActivityForResult(sendJob, SEND_CODE)
         } else if(requestCode == SEND_CODE && resultCode == Activity.RESULT_OK) {
             // Send video
-            val service = NetworkUtils.getService(context!!.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+            val service = NetworkUtils.getService(requireContext().getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
             uploadVideo(service!!, data!!.data!!, data.getStringExtra("id")!!)
         }
     }

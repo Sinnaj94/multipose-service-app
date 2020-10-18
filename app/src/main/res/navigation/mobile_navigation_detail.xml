@@ -25,7 +25,7 @@
     <fragment
             android:id="@+id/navigation_output_video"
             android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailHTMLView"
-            android:label="@string/output_video"
+            android:label="@string/three_d"
             tools:layout="@layout/fragment_detail_output_video">
         <argument
                 android:name="id"

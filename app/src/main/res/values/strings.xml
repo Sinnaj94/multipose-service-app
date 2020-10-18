@@ -56,4 +56,9 @@
     <string name="no_posts_detail">That\'s strange… Nobody has posted anything yet…</string>
     <string name="already_have_account">Already have an account?</string>
     <string name="new_user_register_now">New user? Register Now</string>
+    <string name="three_d">3D View</string>
+    <string name="share">Share</string>
+    <string name="delete_dialog_message">The job has failed, do you want to delete it?</string>
+    <string name="delete_dialog_title">Job failed</string>
+    <string name="delete">Delete</string>
 </resources>

@@ -6,8 +6,8 @@
             android:title="@string/source_video"/>
     <item
             android:id="@+id/navigation_output_video"
-            android:icon="@drawable/ic_baseline_personal_video_24"
-            android:title="@string/output_video"/>
+            android:icon="@drawable/ic_baseline_3d_rotation_24"
+            android:title="@string/three_d"/>
 
     <item
             android:id="@+id/navigation_operations"

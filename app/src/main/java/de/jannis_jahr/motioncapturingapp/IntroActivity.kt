@@ -48,8 +48,10 @@ class IntroActivity : AppCompatActivity() {
         onBoarding.setOnRightOutListener {
             val editor = getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE).edit()
             editor.putBoolean(ApplicationConstants.PREFERENCE_INTRO_FINISHED, true)
-            editor.commit()
+            editor.apply()
             finish()
+            val i = Intent(applicationContext, LoginActivity::class.java)
+            startActivity(i)
         }
     }
 }

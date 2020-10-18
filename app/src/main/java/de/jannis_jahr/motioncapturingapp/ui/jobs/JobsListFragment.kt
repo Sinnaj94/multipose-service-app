@@ -1,27 +1,34 @@
 package de.jannis_jahr.motioncapturingapp.ui.jobs
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import de.jannis_jahr.motioncapturingapp.ui.detail.JobDetailActivity
+import de.jannis_jahr.motioncapturingapp.JobDetailActivity
 import de.jannis_jahr.motioncapturingapp.R
+import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import kotlinx.android.synthetic.main.fragment_finished_jobs.*
-
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.nio.file.Files.delete
 
 
 abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener{
-    abstract var resultCode: Int
+    abstract var resultCode: Int?
     // TODO: Rename and change types of parameters
     private lateinit var jobList : ListView
     lateinit var myJobs : ArrayList<JobViewHolder>
@@ -38,36 +45,34 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
             ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
         jobsViewModel = JobsViewModel(sharedPrefs, resultCode)
-        jobsViewModel.loadJobs()
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_finished_jobs, container, false)
-
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        jobList = view.findViewById<ListView>(R.id.job_list)
+        val v = inflater.inflate(R.layout.fragment_finished_jobs, container, false)
+        jobList = v.findViewById<ListView>(R.id.job_list)
         myJobs = arrayListOf<JobViewHolder>()
         val adapter = JobsAdapter(requireContext(), R.layout.list_item_jobs, myJobs)
         jobList.adapter = adapter
-        jobsViewModel.getJobs().observe(viewLifecycleOwner, { item ->
+        jobsViewModel.getJobs().observe(viewLifecycleOwner) { item ->
             // Remove the handlers
             myJobs.forEach { it.removeHandlers() }
             myJobs.clear()
             // Add all jobs
             myJobs.addAll(item.map { JobViewHolder(it) })
             adapter.notifyDataSetChanged()
-        } )
+        }
 
-        pull_refresh.setOnRefreshListener(this)
-
-        jobsViewModel.isRefreshing.observe(viewLifecycleOwner, {
-            pull_refresh.isRefreshing = it
-        })
-        pull_refresh.isRefreshing = true
-        jobList.setOnItemClickListener { adapterView, clickedView, i, l ->
+        jobList.setOnItemClickListener { _, _, i, l ->
             onJobsTap(i)
         }
+        return v
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        pull_refresh.isRefreshing = true
+        jobsViewModel.isRefreshing.observe(viewLifecycleOwner) {
+            pull_refresh.isRefreshing = it
+        }
+        pull_refresh.setOnRefreshListener(this)
     }
 
 
@@ -80,7 +85,6 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
 
     override fun onResume() {
         super.onResume()
-        Log.d("RESUME", "Resuming fragment")
         jobsViewModel.loadJobs()
     }
 
@@ -89,16 +93,56 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
     }
 
     fun showJobDetail(position: Int) {
-        val intent = Intent(context, JobDetailActivity::class.java)
-        intent.putExtra("id", myJobs[position].job.id.toString())
-        intent.putExtra("title", myJobs[position].job.name)
-        activity!!.startActivity(intent)
+        when(myJobs[position].job.result.result_code) {
+            -1 -> showDeletePrompt(position)
+            0 -> return
+            1 -> {
+                val intent = Intent(context, JobDetailActivity::class.java)
+                intent.putExtra("id", myJobs[position].job.id.toString())
+                intent.putExtra("title", myJobs[position].job.name)
+                requireActivity().startActivity(intent)
+            }
+        }
+    }
+
+    fun showDeletePrompt(position: Int) {
+        val builder: AlertDialog.Builder? = activity?.let {
+            AlertDialog.Builder(it)
+        }
+
+        builder?.setMessage(R.string.delete_dialog_message)!!
+                .setTitle(R.string.delete_dialog_title)
+                .setPositiveButton(R.string.delete, DialogInterface.OnClickListener { dialog, which ->
+                    // remove via api call
+                    val service =
+                            NetworkUtils.getService(requireContext().getSharedPreferences(
+                                    ApplicationConstants.PREFERENCES,
+                                    Context.MODE_PRIVATE))
+                    val call = service!!.deleteJob(myJobs[position].job.id.toString())
+                    call.enqueue(object: Callback<Job> {
+                        override fun onFailure(call: Call<Job>, t: Throwable) {
+                        }
+
+                        override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                            if(response.code() == 200) {
+                                jobsViewModel.loadJobs()
+                            }
+                        }
+
+                    })
+                }
+                )
+
+        val dialog: AlertDialog? = builder.create()
+
+        dialog!!.show()
+
     }
 }
 
 class FinishedJobsFragment: JobsListFragment() {
-    override var resultCode: Int
-        get() = 1
+    override var resultCode: Int?
+        get() = null
         set(value) {}
 
     override fun onJobsTap(position: Int) {
@@ -108,7 +152,7 @@ class FinishedJobsFragment: JobsListFragment() {
 
 
 class FailedJobsFragment: JobsListFragment() {
-    override var resultCode: Int
+    override var resultCode: Int?
         get() = -1
         set(value) {}
 
@@ -118,7 +162,7 @@ class FailedJobsFragment: JobsListFragment() {
 }
 
 class PendingJobsFragment: JobsListFragment() {
-    override var resultCode: Int
+    override var resultCode: Int?
         get() = 0
         set(value) {}
 

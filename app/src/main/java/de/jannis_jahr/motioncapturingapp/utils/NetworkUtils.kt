@@ -1,6 +1,7 @@
 package de.jannis_jahr.motioncapturingapp.utils
 
 import android.content.SharedPreferences
+import com.google.gson.GsonBuilder
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
@@ -10,10 +11,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class NetworkUtils {
     companion object {
+        val gson = GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                .create()
         public fun getServiceNoAuth(host: String) : MocapService {
             return Retrofit.Builder()
                 .baseUrl("$host${ApplicationConstants.BASE_ROUTE}")
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
                 .create(MocapService::class.java)
         }
@@ -29,7 +33,7 @@ class NetworkUtils {
             return Retrofit.Builder()
                 .baseUrl("$host${ApplicationConstants.BASE_ROUTE}")
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
                 .create(MocapService::class.java)
         }

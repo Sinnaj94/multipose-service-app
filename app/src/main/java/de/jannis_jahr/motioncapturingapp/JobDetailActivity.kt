@@ -1,7 +1,9 @@
-package de.jannis_jahr.motioncapturingapp.ui.detail
+package de.jannis_jahr.motioncapturingapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import androidx.navigation.*
 import androidx.navigation.ui.AppBarConfiguration
@@ -11,6 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.jannis_jahr.motioncapturingapp.R
 
 class JobDetailActivity : AppCompatActivity() {
+    lateinit var navController:NavController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_job_detail)
@@ -35,11 +38,22 @@ class JobDetailActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _: NavController, dest: NavDestination, _: Bundle? ->
             dest.addArgument("id", idArgument)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.setDisplayShowHomeEnabled(true)
         }
 
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
+    }
+
+    override fun onBackPressed() {
+        finish()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.job_detail_menu, menu)
+        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

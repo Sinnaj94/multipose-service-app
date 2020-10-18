@@ -5,19 +5,13 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import de.jannis_jahr.motioncapturingapp.network.services.MocapService
-import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils.Companion.getService
-import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class JobsViewModel(private val sharedPreferences : SharedPreferences, private val resultCode : Int) : ViewModel(){
+class JobsViewModel(private val sharedPreferences: SharedPreferences, private val resultCode: Int?) : ViewModel(){
 
     companion object {
         const val TAG = "DASHBOARD_VIEW_MODEL"
