@@ -10,22 +10,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
-import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthInterceptor
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import de.jannis_jahr.motioncapturingapp.utils.RealPathUtil
 import kotlinx.android.synthetic.main.activity_send_job.*
 import okhttp3.MediaType
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.io.File
 
 class SendJobActivity : AppCompatActivity() {
     var fileURI : Uri? = null

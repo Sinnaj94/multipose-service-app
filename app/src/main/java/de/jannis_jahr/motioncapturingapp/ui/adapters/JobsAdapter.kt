@@ -9,9 +9,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import de.jannis_jahr.motioncapturingapp.network.services.model.Result
+import android.webkit.WebView
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -26,13 +28,7 @@ import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class JobsAdapter(
     context: Context, resource: Int, list: ArrayList<JobViewHolder>
@@ -49,6 +45,9 @@ class JobsAdapter(
         var progressStage: TextView? = view?.findViewById(R.id.job_stage)
         var problem: ImageButton? = view?.findViewById(R.id.job_problem)
         var progressIcon: ImageView? = view?.findViewById(R.id.job_icon)
+        var webView: WebView? = view?.findViewById(R.id.webView)
+        var bookmarkView: ImageView? = view?.findViewById(R.id.bookmark_view)
+        var bookmarkState = false
     }
 
 
@@ -71,61 +70,58 @@ class JobsAdapter(
         holder.date?.text = formatter.format(jv.job.date_updated)
         holder.name?.text = jv.job.name
         val resultCode = jv.job.result.result_code
-        if(resultCode == 2 || resultCode == 0) {
-            when(resultCode) {
-                0 -> holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_sync_24)
-                2 -> holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_hourglass_bottom_24)
+        when (resultCode) {
+            2 -> {
+                holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_hourglass_bottom_24)
             }
-            val service = NetworkUtils.getService(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
-            jv.progressHandler.post(object : Runnable {
-                override fun run() {
-                    val currentHandler = this
-                    val call = service!!.getResult(jv.job.id.toString())
-                    call.enqueue(object : Callback<Result> {
-                        @RequiresApi(Build.VERSION_CODES.N)
-                        override fun onResponse(call: Call<Result>, response: Response<Result>) {
-                            //holder.problem!!.visibility = View.GONE
-                            //holder.progressBar?.visibility = View.VISIBLE
-
-                            if(response.code() == 200) {
-                                val result = response.body()!!
-                                when(result.result_code) {
-                                    -1 -> holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_report_problem_24)
-                                    0 -> {
-                                        holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_sync_24)
-                                        jv.progressHandler.postDelayed(currentHandler, 1000)
-                                    }
-                                    1 -> holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_check_circle_24)
-                                    2 -> {
-                                        holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_hourglass_bottom_24)
-                                        jv.progressHandler.postDelayed(currentHandler, 1000)
-                                    }
-                                }
-                            }
-                        }
-
-                        override fun onFailure(call: Call<Result>, t: Throwable) {
-                            // TODO
-                        }
-
-                    })
-                }
-            })
-        } else if(resultCode == 1) {
-            holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_check_circle_24)
-        } else if(resultCode == -1) {
-            holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_report_problem_24)
+            0 -> {
+                holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_sync_24)
+            }
+            1 -> {
+                holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_check_circle_24)
+            }
+            -1 -> {
+                holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_report_problem_24)
+            }
         }
-        if(jv.job.video_uploaded) {
-            bindImage(position, holder.image!!)
+        bindImage(position = jv.job, thumb = holder)
+        if(holder.webView != null) {
+            holder.webView?.settings!!.javaScriptEnabled = true
+            holder.webView?.settings!!.domStorageEnabled = true
+            holder.webView?.settings!!.databaseEnabled = true
+            val myHost = NetworkUtils.getHost(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+            holder.webView?.loadUrl("$myHost${ApplicationConstants.BASE_ROUTE}results/${jv.job.id}/render_html")
+        }
+
+        if(holder.bookmarkView != null) {
+            holder.bookmarkView!!.setOnClickListener {
+                holder.bookmarkState = !holder.bookmarkState
+                when(holder.bookmarkState) {
+                    true -> {
+                        holder.bookmarkView!!.setImageResource(R.drawable.ic_baseline_bookmark_24)
+                        DrawableCompat.setTint(
+                            DrawableCompat.wrap(holder.bookmarkView!!.drawable),
+                            ContextCompat.getColor(context, R.color.colorAccent)
+                        )
+                    }
+                    false -> {
+                        holder.bookmarkView!!.setImageResource(R.drawable.ic_baseline_bookmark_border_24)
+                        DrawableCompat.setTint(
+                            DrawableCompat.wrap(holder.bookmarkView!!.drawable),
+                            ContextCompat.getColor(context, android.R.color.darker_gray)
+                        )
+                    }
+                }
+            }
         }
 
         return rowView!!
     }
 
-
-    fun bindImage(position: Int, thumb: ImageView) {
-        val jv = list[position]
+    private fun bindImage(position: Job, thumb: ViewHolder) {
+        val jv = list.first {
+            it.job.id == position.id
+        }
 
         jv.imageBinderHandler = Handler(Looper.getMainLooper())
         val runnable = Runnable {
@@ -135,7 +131,7 @@ class JobsAdapter(
         val sharedPreferences = context.getSharedPreferences("users", Context.MODE_PRIVATE)
         val token = sharedPreferences.getString("token", "")
         val host = sharedPreferences.getString("hostname", "")
-        val thumbnailPath = host + list[position].job.thumbnail_url
+        val thumbnailPath = host + jv.job.thumbnail_url
         var retries = 4
         val fullThumbnailUrl = GlideUrl(
             thumbnailPath,
@@ -173,8 +169,7 @@ class JobsAdapter(
                     return false
                 }
 
-            })
-            .into(thumb)
+            }).into(thumb.image!!)
     }
 
     init {
@@ -196,14 +191,6 @@ class JobsAdapter(
 
     override fun getItemId(p0: Int): Long {
         return p0.toLong()
-    }
-
-    override fun notifyDataSetChanged() {
-        this.setNotifyOnChange(false);
-        sort { o1, o2 ->
-            o2.job.date_updated.compareTo(o1.job.date_updated)
-        }
-        this.setNotifyOnChange(true);
     }
 
     override fun clear() {

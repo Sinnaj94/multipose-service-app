@@ -5,9 +5,12 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -44,14 +47,16 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         val sharedPrefs = requireContext().getSharedPreferences(
             ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
-        jobsViewModel = JobsViewModel(sharedPrefs, resultCode)
+        jobsViewModel = JobsViewModel(sharedPrefs, false, resultCode)
 
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_finished_jobs, container, false)
         jobList = v.findViewById<ListView>(R.id.job_list)
+        registerForContextMenu(jobList)
         myJobs = arrayListOf<JobViewHolder>()
         val adapter = JobsAdapter(requireContext(), R.layout.list_item_jobs, myJobs)
         jobList.adapter = adapter
+        jobList.emptyView = v.findViewById(R.id.jobs_placeholder)
         jobsViewModel.getJobs().observe(viewLifecycleOwner) { item ->
             // Remove the handlers
             myJobs.forEach { it.removeHandlers() }
@@ -75,6 +80,16 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         pull_refresh.setOnRefreshListener(this)
     }
 
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+        if(v.id == jobList.id) {
+            val lv = v as ListView
+            val acmi = menuInfo as AdapterView.AdapterContextMenuInfo
+            val obj = lv.getItemAtPosition(acmi.position) as JobViewHolder
+
+            menu.add("Test")
+            menu.add(obj.job.name)
+        }
+    }
 
     abstract fun onJobsTap(position : Int)
 
@@ -119,11 +134,11 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
                                     ApplicationConstants.PREFERENCES,
                                     Context.MODE_PRIVATE))
                     val call = service!!.deleteJob(myJobs[position].job.id.toString())
-                    call.enqueue(object: Callback<Job> {
-                        override fun onFailure(call: Call<Job>, t: Throwable) {
+                    call.enqueue(object: Callback<Boolean> {
+                        override fun onFailure(call: Call<Boolean>, t: Throwable) {
                         }
 
-                        override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                        override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                             if(response.code() == 200) {
                                 jobsViewModel.loadJobs()
                             }

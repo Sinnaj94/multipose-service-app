@@ -14,6 +14,12 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.VideoView
 import androidx.fragment.app.Fragment
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.ui.PlayerView
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.MocapService
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
@@ -62,15 +68,14 @@ open class DetailVideo : Fragment() {
                     val myVideoURL : String =
                         response.body()!!.input_video_url
                     val uri = Uri.parse(prefs.getString("hostname", "") + myVideoURL)
-                    val videoHolder = view.findViewById<VideoView>(R.id.video_view)
-                    videoHolder.setVideoURI(uri)
-                    videoHolder.setOnPreparedListener {
-                        view.findViewById<ProgressBar>(R.id.spinner)
-                        videoHolder.start()
-                        videoHolder.requestLayout()
-                        videoHolder.invalidate()
-                        it.isLooping = true
-                    }
+                    val videoHolder = view.findViewById<PlayerView>(R.id.video_view)
+                    val player = SimpleExoPlayer.Builder(requireContext()).build()
+                    val vid = MediaItem.fromUri(uri)
+                    player.setMediaItem(vid)
+                    player.repeatMode = Player.REPEAT_MODE_ALL
+                    player.prepare()
+                    player.play()
+                    videoHolder.player = player
                 }
             }
 

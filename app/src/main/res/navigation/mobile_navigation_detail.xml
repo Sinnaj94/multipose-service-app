@@ -15,9 +15,6 @@
                 app:argType="string"
                 />
         <action
-                android:id="@+id/action_navigation_source_video_to_navigation_operations"
-                app:destination="@id/navigation_operations" />
-        <action
                 android:id="@+id/action_navigation_source_video_to_navigation_output_video"
                 app:destination="@id/navigation_output_video" />
     </fragment>
@@ -34,12 +31,9 @@
         <action
                 android:id="@+id/action_navigation_output_video_to_navigation_source_video"
                 app:destination="@id/navigation_source_video" />
-        <action
-                android:id="@+id/action_navigation_output_video_to_navigation_operations"
-                app:destination="@id/navigation_operations" />
     </fragment>
 
-    <fragment
+    <!--fragment
             android:id="@+id/navigation_operations"
             android:name="de.jannis_jahr.motioncapturingapp.ui.detail.DetailOperations"
             android:label="@string/operations"
@@ -54,6 +48,6 @@
         <action
                 android:id="@+id/action_navigation_operations_to_navigation_output_video"
                 app:destination="@id/navigation_output_video" />
-    </fragment>
+    </fragment-->
 
 </navigation>

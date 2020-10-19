@@ -1,21 +1,32 @@
 package de.jannis_jahr.motioncapturingapp
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.navigation.*
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import de.jannis_jahr.motioncapturingapp.R
+import de.jannis_jahr.motioncapturingapp.network.services.model.Job
+import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class JobDetailActivity : AppCompatActivity() {
     lateinit var navController:NavController
+    var id : String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        title = intent.getStringExtra("title")!!
+        id = intent.getStringExtra("id")!!
         setContentView(R.layout.activity_job_detail)
 
         val navView: BottomNavigationView = findViewById(R.id.nav_view_detail)
@@ -25,7 +36,7 @@ class JobDetailActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_source_video, R.id.navigation_output_video, R.id.navigation_operations
+                R.id.navigation_source_video, R.id.navigation_output_video
             )
         )
         val inflater = navController.navInflater
@@ -38,6 +49,7 @@ class JobDetailActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _: NavController, dest: NavDestination, _: Bundle? ->
             dest.addArgument("id", idArgument)
+            title = intent.getStringExtra("title")!!
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
             supportActionBar?.setDisplayShowHomeEnabled(true)
         }
@@ -59,7 +71,25 @@ class JobDetailActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             android.R.id.home -> finish()
+            R.id.post -> post()
         }
         return true
+    }
+
+    fun post() {
+        val sp = NetworkUtils.getService(getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+        val call = sp!!.postJob(id!!)
+        call.enqueue(object : Callback<Job> {
+            override fun onFailure(call: Call<Job>, t: Throwable) {
+
+            }
+
+            override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                if(response.code() == 200) {
+                    Toast.makeText(applicationContext, "${response.body()!!.name} is now public.",
+                    Toast.LENGTH_LONG).show()
+                }
+            }
+        })
     }
 }

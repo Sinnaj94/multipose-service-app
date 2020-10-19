@@ -54,6 +54,8 @@
     <string name="onboarding_3_text">Now it\'s time to experiment.</string>
     <string name="no_posts">No posts</string>
     <string name="no_posts_detail">That\'s strange… Nobody has posted anything yet…</string>
+    <string name="no_jobs">No jobs</string>
+    <string name="no_jobs_detail">There are no jobs right now. Go ahead and create one!</string>
     <string name="already_have_account">Already have an account?</string>
     <string name="new_user_register_now">New user? Register Now</string>
     <string name="three_d">3D View</string>
@@ -61,4 +63,8 @@
     <string name="delete_dialog_message">The job has failed, do you want to delete it?</string>
     <string name="delete_dialog_title">Job failed</string>
     <string name="delete">Delete</string>
+    <string name="post">Post</string>
+    <string name="share_to_pc">Send to software</string>
+    <string name="lorem_ipsum_long">"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. "</string>
+    <string name="collections">Collections</string>
 </resources>

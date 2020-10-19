@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <item
-        android:id="@+id/share_to_3d"
-        android:title="@string/share"
-        app:showAsAction="always"
+        android:id="@+id/post"
+        android:title="@string/post"
         android:icon="@drawable/ic_baseline_share_24"
+        app:showAsAction="ifRoom"
+
+        />
+    <item
+        app:showAsAction="ifRoom"
+        android:id="@+id/share_to_3d"
+        android:title="@string/share_to_pc"
+        android:icon="@drawable/ic_baseline_screen_share_24"
         />
 </menu>

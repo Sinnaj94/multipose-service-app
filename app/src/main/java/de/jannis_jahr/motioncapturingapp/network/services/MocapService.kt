@@ -44,5 +44,11 @@ interface MocapService {
     fun getResult(@Path("id") id: String): Call<Result>
 
     @DELETE("jobs/{id}")
-    fun deleteJob(@Path("id") id: String) : Call<Job>
+    fun deleteJob(@Path("id") id: String) : Call<Boolean>
+
+    @GET("posts/")
+    fun getPosts() : Call<List<Job>>
+
+    @POST("posts/{id}")
+    fun postJob(@Path("id") id: String) : Call<Job>
 }

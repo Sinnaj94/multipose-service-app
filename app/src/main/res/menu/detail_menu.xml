@@ -8,9 +8,4 @@
             android:id="@+id/navigation_output_video"
             android:icon="@drawable/ic_baseline_3d_rotation_24"
             android:title="@string/three_d"/>
-
-    <item
-            android:id="@+id/navigation_operations"
-            android:icon="@drawable/ic_baseline_settings_24"
-            android:title="@string/operations"/>
 </menu>

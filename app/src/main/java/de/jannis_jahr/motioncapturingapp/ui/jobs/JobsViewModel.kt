@@ -11,7 +11,10 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class JobsViewModel(private val sharedPreferences: SharedPreferences, private val resultCode: Int?) : ViewModel(){
+class JobsViewModel(
+    private val sharedPreferences: SharedPreferences,
+    private val posts: Boolean = false,
+    private val resultCode: Int?) : ViewModel(){
 
     companion object {
         const val TAG = "DASHBOARD_VIEW_MODEL"
@@ -36,7 +39,11 @@ class JobsViewModel(private val sharedPreferences: SharedPreferences, private va
         // Do an asynchronous operation to fetch users.
         val request = getService(sharedPreferences)
 
-        val call = request!!.getJobs(resultCode)
+        val call = if(posts) {
+            request!!.getPosts()
+        } else {
+            request!!.getJobs(resultCode)
+        }
 
         call.enqueue(object: Callback<List<Job>> {
             override fun onResponse(call: Call<List<Job>>, response: Response<List<Job>>) {
