@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
             val i = Intent(applicationContext, LoginActivity::class.java)
             startActivity(i)
         }
-        return true
+        return false
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

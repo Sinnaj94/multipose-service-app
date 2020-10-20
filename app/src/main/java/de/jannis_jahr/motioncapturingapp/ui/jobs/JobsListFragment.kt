@@ -5,12 +5,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.ContextMenu
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AdapterView
+import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -18,7 +15,6 @@ import androidx.lifecycle.observe
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import de.jannis_jahr.motioncapturingapp.JobDetailActivity
 import de.jannis_jahr.motioncapturingapp.R
-import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
@@ -27,7 +23,6 @@ import kotlinx.android.synthetic.main.fragment_finished_jobs.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.nio.file.Files.delete
 
 
 abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener{
@@ -80,14 +75,23 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         pull_refresh.setOnRefreshListener(this)
     }
 
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        val info = item.menuInfo as AdapterContextMenuInfo
+        when(item.itemId) {
+            0 -> {
+                showDeletePrompt(info.position)
+            }
+        }
+        return true
+    }
+
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         if(v.id == jobList.id) {
             val lv = v as ListView
             val acmi = menuInfo as AdapterView.AdapterContextMenuInfo
             val obj = lv.getItemAtPosition(acmi.position) as JobViewHolder
 
-            menu.add("Test")
-            menu.add(obj.job.name)
+            menu.add("Delete")
         }
     }
 

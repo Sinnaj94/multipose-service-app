@@ -34,13 +34,34 @@ class JobsViewModel(
         return jobs
     }
 
+    public fun loadJobs(tags : ArrayList<String>) {
+        isRefreshing.value = true
+        val request = getService(sharedPreferences)
+
+        val call = request!!.getPosts(tags)
+
+        call.enqueue(object: Callback<List<Job>> {
+            override fun onFailure(call: Call<List<Job>>, t: Throwable) {
+                isRefreshing.value = false
+            }
+
+            override fun onResponse(call: Call<List<Job>>, response: Response<List<Job>>) {
+                isRefreshing.value = false
+                if(response.code() == 200) {
+                    jobs.value = response.body()
+                }
+            }
+
+        })
+    }
+
     public fun loadJobs() {
         isRefreshing.value = true
         // Do an asynchronous operation to fetch users.
         val request = getService(sharedPreferences)
 
         val call = if(posts) {
-            request!!.getPosts()
+            request!!.getPosts(null)
         } else {
             request!!.getJobs(resultCode)
         }

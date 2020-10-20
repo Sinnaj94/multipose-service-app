@@ -67,4 +67,7 @@
     <string name="share_to_pc">Send to software</string>
     <string name="lorem_ipsum_long">"Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. "</string>
     <string name="collections">Collections</string>
+    <string name="title">Give a title</string>
+    <string name="description">Describe your job</string>
+    <string name="add_tag">Add tag</string>
 </resources>

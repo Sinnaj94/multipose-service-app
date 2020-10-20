@@ -22,6 +22,8 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthorization
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
@@ -45,9 +47,12 @@ class JobsAdapter(
         var progressStage: TextView? = view?.findViewById(R.id.job_stage)
         var problem: ImageButton? = view?.findViewById(R.id.job_problem)
         var progressIcon: ImageView? = view?.findViewById(R.id.job_icon)
+        var username: TextView? = view?.findViewById(R.id.user_name)
         var webView: WebView? = view?.findViewById(R.id.webView)
         var bookmarkView: ImageView? = view?.findViewById(R.id.bookmark_view)
         var bookmarkState = false
+        var description: TextView? = view?.findViewById(R.id.my_job_description)
+        var tags: ChipGroup? = view?.findViewById(R.id.tag_group)
     }
 
 
@@ -112,6 +117,23 @@ class JobsAdapter(
                         )
                     }
                 }
+            }
+        }
+
+        if(holder.username != null) {
+            holder.username!!.text = jv.job.user.username
+        }
+
+        if(holder.description != null) {
+            holder.description!!.text = jv.job.description
+        }
+        if(holder.tags != null) {
+            holder.tags!!.removeAllViews()
+            for(t in jv.job.tags) {
+                val chip = Chip(holder.tags!!.context)
+                chip.text = t.text
+                chip.isCheckable = true
+                holder.tags!!.addView(chip)
             }
         }
 

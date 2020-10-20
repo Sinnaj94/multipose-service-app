@@ -23,9 +23,9 @@ interface MocapService {
     @GET("auth/token")
     fun authorize() : Call<Token>
 
-    @Multipart
+    @FormUrlEncoded
     @POST("jobs/")
-    fun addJob(@Part("name") name: RequestBody?) : Call<Job>
+    fun addJob(@Field("name") name: String, @Field("tags") tags: ArrayList<String>) : Call<Job>
 
     @Multipart
     @PUT("jobs/{id}/upload")
@@ -47,7 +47,7 @@ interface MocapService {
     fun deleteJob(@Path("id") id: String) : Call<Boolean>
 
     @GET("posts/")
-    fun getPosts() : Call<List<Job>>
+    fun getPosts( @Query("tags[]") tags: ArrayList<String>?) : Call<List<Job>>
 
     @POST("posts/{id}")
     fun postJob(@Path("id") id: String) : Call<Job>
