@@ -53,7 +53,7 @@
     <string name="onboarding_3_title">That\'s it!</string>
     <string name="onboarding_3_text">Now it\'s time to experiment.</string>
     <string name="no_posts">No posts</string>
-    <string name="no_posts_detail">That\'s strange… Nobody has posted anything yet…</string>
+    <string name="no_posts_detail">No posts with given filter criteria were found…</string>
     <string name="no_jobs">No jobs</string>
     <string name="no_jobs_detail">There are no jobs right now. Go ahead and create one!</string>
     <string name="already_have_account">Already have an account?</string>
@@ -70,4 +70,5 @@
     <string name="title">Give a title</string>
     <string name="description">Describe your job</string>
     <string name="add_tag">Add tag</string>
+    <string name="string_public">Public</string>
 </resources>

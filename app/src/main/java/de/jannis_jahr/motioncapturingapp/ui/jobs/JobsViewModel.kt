@@ -14,7 +14,8 @@ import retrofit2.Response
 class JobsViewModel(
     private val sharedPreferences: SharedPreferences,
     private val posts: Boolean = false,
-    private val resultCode: Int?) : ViewModel(){
+    private val resultCode: Int?,
+    private val tags: ArrayList<String>? = null) : ViewModel(){
 
     companion object {
         const val TAG = "DASHBOARD_VIEW_MODEL"
@@ -24,7 +25,11 @@ class JobsViewModel(
     // Example: https://developer.android.com/topic/libraries/architecture/viewmodel
     private val jobs: MutableLiveData<List<Job>> by lazy {
         MutableLiveData<List<Job>>().also {
-            loadJobs()
+            if(tags != null) {
+                loadJobs(tags)
+            } else {
+                loadJobs()
+            }
         }
     }
 

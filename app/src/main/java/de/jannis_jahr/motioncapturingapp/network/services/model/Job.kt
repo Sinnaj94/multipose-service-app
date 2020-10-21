@@ -9,6 +9,7 @@ data class Job (
     val description: String,
     val video_uploaded: Boolean,
     val date_updated: Date,
+    val public: Boolean,
     val input_video_url: String,
     val thumbnail_url: String,
     val result: Result,

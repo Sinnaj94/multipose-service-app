@@ -2,13 +2,12 @@ package de.jannis_jahr.motioncapturingapp.ui.home
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.observe
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.chip.Chip
@@ -17,21 +16,17 @@ import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
 import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsViewModel
+import de.jannis_jahr.motioncapturingapp.ui.view.JobListTagsObserver
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
-import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
-import kotlinx.android.synthetic.main.activity_send_job.*
-import kotlinx.android.synthetic.main.fragment_finished_jobs.*
 import kotlinx.android.synthetic.main.fragment_home.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTagsObserver{
 
     private lateinit var jobsViewModel: JobsViewModel
     private lateinit var jobList : ListView
     lateinit var myJobs : ArrayList<JobViewHolder>
-    private var tagList: ArrayList<String> = arrayListOf()
+    var textCardCount : TextView? = null
+    private lateinit var tagList: TagList
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,12 +35,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val sharedPrefs = requireContext().getSharedPreferences(
             ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
+        tagList = TagList(sharedPrefs)
         setHasOptionsMenu(true)
-        jobsViewModel = JobsViewModel(sharedPrefs, true, null)
+        jobsViewModel = JobsViewModel(sharedPrefs, true, null, tagList)
         val v = inflater.inflate(R.layout.fragment_home, container, false)
         jobList = v.findViewById(R.id.posts_list)
         myJobs = arrayListOf<JobViewHolder>()
-        val adapter = JobsAdapter(requireContext(), R.layout.big_list_item_jobs, myJobs)
+        val adapter = JobsAdapter(requireContext(), R.layout.big_list_item_jobs, myJobs, this)
         jobList.adapter = adapter
         jobList.emptyView = v.findViewById(R.id.posts_placeholder)
         jobsViewModel.getJobs().observe(viewLifecycleOwner) { item ->
@@ -59,20 +55,41 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         jobList.setOnItemClickListener { _, _, i, l ->
             //onJobsTap(i)
         }
+
         return v
     }
 
+    /* https://stackoverflow.com/questions/43194243/notification-badge-on-action-item-android */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.home_menu, menu)
+        val menuItem = menu.findItem(R.id.filter)
+
+        val actionView = menuItem.actionView
+        textCardCount = actionView.findViewById(R.id.cart_badge)
+        badgeSetup()
+
+        actionView.setOnClickListener {
+            onOptionsItemSelected(menuItem)
+        }
+    }
+
+    private fun badgeSetup() {
+        if(tagList.isEmpty()) {
+            textCardCount?.visibility = View.GONE
+        } else {
+            textCardCount?.visibility = View.VISIBLE
+            textCardCount?.text = tagList.size.toString()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.filter -> {
                 showFilters()
+                return true
             }
         }
-        return true
+        return super.onOptionsItemSelected(item)
     }
 
     fun showFilters() {
@@ -93,13 +110,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 .setView(v)
 
         add_tag.setOnClickListener {
-            addTag(job_tag, tags)
+            addTag(job_tag.text.toString(), tags)
+            job_tag.text.clear()
         }
 
         job_tag.setOnKeyListener { v, keyCode, event ->
             if(event.action == KeyEvent.ACTION_DOWN &&
                     keyCode == KeyEvent.KEYCODE_ENTER) {
-                addTag(job_tag, tags)
+                addTag(job_tag.text.toString(), tags)
+                job_tag.text.clear()
                 return@setOnKeyListener false
             }
             true
@@ -115,28 +134,35 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             chip.setOnCloseIconClickListener {
                 tags.removeView(it)
                 tagList.remove(tag)
+                badgeSetup()
             }
             tags.addView(chip)
         }
         dialog!!.show()
     }
 
-    fun addTag(job_tag: EditText, tags: ChipGroup) {
-        if(!job_tag.text.isEmpty()) {
-            val addedText = job_tag.text.toString().toLowerCase().trim()
-            if(!tagList.contains(addedText)) {
-                val chip = Chip(tags.context)
-                chip.text = addedText
-                chip.isCloseIconVisible = true
-                chip.setOnCloseIconClickListener {
-                    tags.removeView(it)
-                    tagList.remove(addedText)
-                }
-                tagList.add(addedText)
-                tags.addView(chip)
-                job_tag.text.clear()
-            }
+    fun convertTag(job_tag: String): String? {
+        if(!job_tag.isEmpty()) {
+            val addedText = job_tag.toString().toLowerCase().trim()
+            return addedText
         }
+        return null
+    }
+
+    fun addTag(job_tag: String, tags: ChipGroup) {
+        val addedText = convertTag(job_tag) ?: return
+        if(tagList.contains(addedText)) return
+        val chip = Chip(tags.context)
+        chip.text = addedText
+        chip.isCloseIconVisible = true
+        chip.setOnCloseIconClickListener {
+            tags.removeView(it)
+            tagList.remove(addedText)
+            badgeSetup()
+        }
+        tagList.add(addedText)
+        tags.addView(chip)
+        badgeSetup()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -149,5 +175,45 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onRefresh() {
         jobsViewModel.loadJobs(tagList)
+    }
+
+    override fun notifyAdd(tag: String) {
+        val conv = convertTag(tag)?:return
+        if(tagList.contains(conv)) return
+        tagList.add(conv)
+        badgeSetup()
+        jobsViewModel.loadJobs(tagList)
+    }
+
+    override fun notifyRemove(tag: String) {
+        Log.d("FILTERING", tag)
+        val conv = convertTag(tag)?:return
+        tagList.remove(conv)
+        badgeSetup()
+        jobsViewModel.loadJobs(tagList)
+    }
+
+    class TagList(val sharedPreferences: SharedPreferences) : ArrayList<String>() {
+        init {
+            addAll(sharedPreferences.getStringSet(
+                    ApplicationConstants.TAGS,
+                    setOf()
+            )!!.toTypedArray())
+        }
+        override fun add(element: String): Boolean {
+            val edit = sharedPreferences.edit()
+            val bool = super.add(element)
+            edit.putStringSet(ApplicationConstants.TAGS, this.toMutableSet())
+            edit.apply()
+            return bool
+        }
+
+        override fun remove(element: String): Boolean {
+            val bool = super.remove(element)
+            val edit = sharedPreferences.edit()
+            edit.putStringSet(ApplicationConstants.TAGS, this.toMutableSet())
+            edit.apply()
+            return bool
+        }
     }
 }

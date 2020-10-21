@@ -49,7 +49,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         jobList = v.findViewById<ListView>(R.id.job_list)
         registerForContextMenu(jobList)
         myJobs = arrayListOf<JobViewHolder>()
-        val adapter = JobsAdapter(requireContext(), R.layout.list_item_jobs, myJobs)
+        val adapter = JobsAdapter(requireContext(), R.layout.list_item_jobs, myJobs, null)
         jobList.adapter = adapter
         jobList.emptyView = v.findViewById(R.id.jobs_placeholder)
         jobsViewModel.getJobs().observe(viewLifecycleOwner) { item ->

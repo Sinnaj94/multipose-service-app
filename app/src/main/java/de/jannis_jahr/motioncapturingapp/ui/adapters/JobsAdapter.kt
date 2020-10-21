@@ -1,6 +1,7 @@
 package de.jannis_jahr.motioncapturingapp.ui.adapters
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
@@ -28,16 +29,22 @@ import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthorization
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.ui.view.JobListTagsObservable
+import de.jannis_jahr.motioncapturingapp.ui.view.JobListTagsObserver
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 
 class JobsAdapter(
-    context: Context, resource: Int, list: ArrayList<JobViewHolder>
-) : ArrayAdapter<JobViewHolder>(context, resource, list) {
+        context: Context, resource: Int, list: ArrayList<JobViewHolder>, override var observer: JobListTagsObserver?
+) : ArrayAdapter<JobViewHolder>(context, resource, list), JobListTagsObservable {
     var resource: Int
     var list: ArrayList<JobViewHolder>
     var vi: LayoutInflater
+
 
     internal class ViewHolder(view: View?) {
         var image : ImageView? = view?.findViewById(R.id.thumbnail)
@@ -53,6 +60,7 @@ class JobsAdapter(
         var bookmarkState = false
         var description: TextView? = view?.findViewById(R.id.my_job_description)
         var tags: ChipGroup? = view?.findViewById(R.id.tag_group)
+        var isPublicSwitch: Switch? = view?.findViewById(R.id.is_public)
     }
 
 
@@ -96,6 +104,7 @@ class JobsAdapter(
             holder.webView?.settings!!.databaseEnabled = true
             val myHost = NetworkUtils.getHost(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
             holder.webView?.loadUrl("$myHost${ApplicationConstants.BASE_ROUTE}results/${jv.job.id}/render_html")
+
         }
 
         if(holder.bookmarkView != null) {
@@ -128,17 +137,80 @@ class JobsAdapter(
             holder.description!!.text = jv.job.description
         }
         if(holder.tags != null) {
+            val sharedPrefs = context.getSharedPreferences(
+                    ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
+            )
+            val array = sharedPrefs.getStringSet(
+                    ApplicationConstants.TAGS,
+                    setOf())
             holder.tags!!.removeAllViews()
+            if(jv.job.tags.isEmpty()) {
+                holder.tags!!.visibility = View.GONE
+            } else {
+                holder.tags!!.visibility = View.VISIBLE
+            }
             for(t in jv.job.tags) {
                 val chip = Chip(holder.tags!!.context)
                 chip.text = t.text
                 chip.isCheckable = true
+                if(array!!.contains(t.text)) {
+                    chip.isChecked = true
+                }
+                chip.setOnCheckedChangeListener { _, isChecked ->
+                    if(isChecked) {
+                        observer?.notifyAdd(chip.text.toString())
+                    } else {
+                        observer?.notifyRemove(chip.text.toString())
+                    }
+                }
                 holder.tags!!.addView(chip)
+            }
+
+        }
+
+        if(holder.isPublicSwitch != null) {
+            holder.isPublicSwitch!!.isChecked = jv.job.public
+            val s = NetworkUtils.getService(context.getSharedPreferences(ApplicationConstants.PREFERENCES,
+                    Context.MODE_PRIVATE))
+            holder.isPublicSwitch!!.setOnCheckedChangeListener { buttonView, isChecked ->
+                if(isChecked) {
+                    val call = s!!.postJob(jv.job.id.toString())
+                    call.enqueue(object: Callback<Job> {
+                        override fun onFailure(call: Call<Job>, t: Throwable) {
+                            holder.isPublicSwitch!!.isChecked = false
+                        }
+
+                        override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                            if(response.code() == 200) {
+                                Toast.makeText(context, "Job is public now.", Toast.LENGTH_LONG).show()
+                            } else {
+                                holder.isPublicSwitch!!.isChecked = false
+                            }
+                        }
+
+                    })
+                } else {
+                    val call = s!!.deleteJobPost(jv.job.id.toString())
+                    call.enqueue(object: Callback<Job> {
+                        override fun onFailure(call: Call<Job>, t: Throwable) {
+                            holder.isPublicSwitch!!.isChecked = true
+                        }
+
+                        override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                            if (response.code() == 200) {
+                                Toast.makeText(context, "Job is private now.", Toast.LENGTH_LONG).show()
+                            } else {
+                                holder.isPublicSwitch!!.isChecked = true
+                            }
+                        }
+                    })
+                }
             }
         }
 
         return rowView!!
     }
+
 
     private fun bindImage(position: Job, thumb: ViewHolder) {
         val jv = list.first {
@@ -218,4 +290,7 @@ class JobsAdapter(
     override fun clear() {
         super.clear()
     }
+
+
+
 }

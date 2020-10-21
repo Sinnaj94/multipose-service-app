@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
         askExternalStoragePermission()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.logout) {
             NetworkUtils.logout(getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
             finish()
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
             startActivity(i)
         }
         return false
-    }
+    }*/
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun askExternalStoragePermission() {
@@ -89,12 +89,6 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
 
         window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        //menuInflater.inflate(R.menu.settings_menu, menu)
-        menuInflater.inflate(R.menu.settings_menu, menu)
-        return true
     }
 
     override fun update() {

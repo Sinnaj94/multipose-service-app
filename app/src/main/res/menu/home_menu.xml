@@ -4,6 +4,7 @@
         android:id="@+id/filter"
         app:showAsAction="always"
         android:icon="@drawable/ic_baseline_filter_alt_24"
+        app:actionLayout="@layout/custom_item_layout"
         android:title="@string/action_logout"/>
 
 </menu>

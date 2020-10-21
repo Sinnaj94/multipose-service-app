@@ -51,4 +51,7 @@ interface MocapService {
 
     @POST("posts/{id}")
     fun postJob(@Path("id") id: String) : Call<Job>
+
+    @DELETE("posts/{id}")
+    fun deleteJobPost(@Path("id") id: String) : Call<Job>
 }
