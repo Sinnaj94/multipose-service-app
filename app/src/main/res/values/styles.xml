@@ -27,4 +27,9 @@
         <item name="android:background">@color/black_overlay</item>
     </style>
 
+    <style name="BookmarkChip">
+        <item name="checkedIconEnabled">false</item>
+        <item name="checkedIcon">@null</item>
+    </style>
+
 </resources>

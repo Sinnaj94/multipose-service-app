@@ -53,16 +53,21 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_baseline_screen_share_24" />
 
-            <ImageButton
-                android:id="@+id/imageButton2"
-                style="@style/Widget.AppCompat.ImageButton"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/bookmark_chip"
+                style="@style/BookmarkChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
+                android:checkable="true"
                 android:elevation="6dp"
+                android:text="0"
+                app:chipBackgroundColor="@color/bg_chip_state_list"
+                app:chipEndPadding="4dp"
+                app:chipIcon="@drawable/bookmark_variable"
+                app:chipIconTint="@color/pure_black"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_baseline_bookmark_border_24" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/thumbnail"

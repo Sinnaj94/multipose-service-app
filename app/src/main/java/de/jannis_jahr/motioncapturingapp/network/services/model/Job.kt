@@ -13,6 +13,8 @@ data class Job (
     val input_video_url: String,
     val thumbnail_url: String,
     val result: Result,
+    val num_bookmarks: Int,
+    val bookmarked: Boolean,
     val user: User,
     val tags: ArrayList<Tag>
 ) {

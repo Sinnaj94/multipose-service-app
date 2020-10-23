@@ -1,9 +1,12 @@
 package de.jannis_jahr.motioncapturingapp.ui.adapters
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
+import android.media.MediaParser
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -13,8 +16,10 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -27,8 +32,11 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthorization
+import de.jannis_jahr.motioncapturingapp.network.services.model.Bookmark
+import de.jannis_jahr.motioncapturingapp.network.services.model.BookmarkStatus
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.ui.SendToAnimationDialogFragment
 import de.jannis_jahr.motioncapturingapp.ui.view.JobListTagsObservable
 import de.jannis_jahr.motioncapturingapp.ui.view.JobListTagsObserver
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
@@ -36,7 +44,13 @@ import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.IOException
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.io.PrintWriter
+import java.net.Socket
 import java.text.SimpleDateFormat
+import kotlin.system.exitProcess
 
 class JobsAdapter(
         context: Context, resource: Int, list: ArrayList<JobViewHolder>, override var observer: JobListTagsObserver?
@@ -61,6 +75,8 @@ class JobsAdapter(
         var description: TextView? = view?.findViewById(R.id.my_job_description)
         var tags: ChipGroup? = view?.findViewById(R.id.tag_group)
         var isPublicSwitch: Switch? = view?.findViewById(R.id.is_public)
+        var bookmarked: Chip? = view?.findViewById(R.id.bookmark_chip)
+        var sendTo3D: ImageButton? = view?.findViewById(R.id.send_to_3d)
     }
 
 
@@ -208,8 +224,67 @@ class JobsAdapter(
             }
         }
 
+        if(holder.bookmarked != null) {
+            holder.bookmarked!!.isChecked = jv.job.bookmarked
+            holder.bookmarked!!.text = jv.job.num_bookmarks.toString()
+            holder.bookmarked!!.setOnCheckedChangeListener { _, isChecked ->
+                val s = NetworkUtils.getService(context.getSharedPreferences(ApplicationConstants.PREFERENCES,
+                        Context.MODE_PRIVATE))
+                if(isChecked) {
+                    val call = s!!.postBookmark(jv.job.id.toString())
+                    call.enqueue(object: Callback<BookmarkStatus> {
+                        override fun onFailure(call: Call<BookmarkStatus>, t: Throwable) {
+                        }
+
+                        override fun onResponse(call: Call<BookmarkStatus>, response: Response<BookmarkStatus>) {
+                            if(response.code() == 200) {
+                                holder.bookmarked!!.text = response.body()!!.count.toString()
+                            }
+                        }
+
+                    })
+                } else {
+                    val call = s!!.deleteBookmark(jv.job.id.toString())
+                    call.enqueue(object: Callback<BookmarkStatus> {
+                        override fun onFailure(call: Call<BookmarkStatus>, t: Throwable) {
+                        }
+
+                        override fun onResponse(call: Call<BookmarkStatus>, response: Response<BookmarkStatus>) {
+                            if(response.code() == 200) {
+                                if(response.isSuccessful) {
+                                    holder.bookmarked!!.text = response.body()!!.count.toString()
+                                }
+                            }
+                        }
+
+                    })
+                }
+
+            }
+        }
+
+        if(holder.sendTo3D != null) {
+            holder.sendTo3D!!.setOnClickListener {
+                val fm = (context as AppCompatActivity).supportFragmentManager
+                val ft = fm.beginTransaction()
+                val prev = fm.findFragmentByTag("dialog")
+                if(prev != null) {
+                    ft.remove(prev)
+                }
+                val f = SendToAnimationDialogFragment()
+
+                val args = Bundle()
+                args.putString("url", jv.job.result.output_bvh)
+                f.arguments = args
+
+                f.show(ft, "dialog")
+            }
+
+        }
+
         return rowView!!
     }
+
 
 
     private fun bindImage(position: Job, thumb: ViewHolder) {

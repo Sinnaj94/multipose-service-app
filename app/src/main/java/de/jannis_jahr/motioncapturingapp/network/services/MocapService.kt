@@ -54,4 +54,10 @@ interface MocapService {
 
     @DELETE("posts/{id}")
     fun deleteJobPost(@Path("id") id: String) : Call<Job>
+
+    @POST("jobs/{id}/bookmark")
+    fun postBookmark(@Path("id") id: String) : Call<BookmarkStatus>
+
+    @DELETE("jobs/{id}/bookmark")
+    fun deleteBookmark(@Path("id") id: String) : Call<BookmarkStatus>
 }
