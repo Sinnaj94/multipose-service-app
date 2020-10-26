@@ -55,9 +55,12 @@ interface MocapService {
     @DELETE("posts/{id}")
     fun deleteJobPost(@Path("id") id: String) : Call<Job>
 
-    @POST("jobs/{id}/bookmark")
+    @POST("jobs/bookmarks/{id}")
     fun postBookmark(@Path("id") id: String) : Call<BookmarkStatus>
 
-    @DELETE("jobs/{id}/bookmark")
+    @DELETE("jobs/bookmarks/{id}")
     fun deleteBookmark(@Path("id") id: String) : Call<BookmarkStatus>
+
+    @GET("jobs/bookmarks")
+    fun getCollection(@Query("tags[]") tags: ArrayList<String>?): Call<List<Job>>
 }

@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
         askExternalStoragePermission()
     }
 
-    /*override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.logout) {
             NetworkUtils.logout(getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
             finish()
@@ -54,7 +54,12 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
             startActivity(i)
         }
         return false
-    }*/
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.settings_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun askExternalStoragePermission() {

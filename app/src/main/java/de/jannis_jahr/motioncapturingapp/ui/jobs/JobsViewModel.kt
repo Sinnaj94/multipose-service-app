@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
+import de.jannis_jahr.motioncapturingapp.ui.JobsRequestType
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils.Companion.getService
 import retrofit2.Call
 import retrofit2.Callback
@@ -13,7 +15,7 @@ import retrofit2.Response
 
 class JobsViewModel(
     private val sharedPreferences: SharedPreferences,
-    private val posts: Boolean = false,
+    private val type: JobsRequestType,
     private val resultCode: Int?,
     private val tags: ArrayList<String>? = null) : ViewModel(){
 
@@ -43,7 +45,11 @@ class JobsViewModel(
         isRefreshing.value = true
         val request = getService(sharedPreferences)
 
-        val call = request!!.getPosts(tags)
+        val call = when(type) {
+            JobsRequestType.JOBS -> request!!.getPosts(tags)
+            JobsRequestType.DASHBOARD -> request!!.getJobs(null)
+            JobsRequestType.BOOKMARKS -> request!!.getCollection(tags)
+        }
 
         call.enqueue(object: Callback<List<Job>> {
             override fun onFailure(call: Call<List<Job>>, t: Throwable) {
@@ -65,10 +71,10 @@ class JobsViewModel(
         // Do an asynchronous operation to fetch users.
         val request = getService(sharedPreferences)
 
-        val call = if(posts) {
-            request!!.getPosts(null)
-        } else {
-            request!!.getJobs(resultCode)
+        val call = when(type) {
+            JobsRequestType.JOBS -> request!!.getPosts(null)
+            JobsRequestType.DASHBOARD -> request!!.getJobs(null)
+            JobsRequestType.BOOKMARKS -> request!!.getCollection(null)
         }
 
         call.enqueue(object: Callback<List<Job>> {

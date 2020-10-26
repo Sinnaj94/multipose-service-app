@@ -193,14 +193,11 @@ class JobsAdapter(
                     val call = s!!.postJob(jv.job.id.toString())
                     call.enqueue(object: Callback<Job> {
                         override fun onFailure(call: Call<Job>, t: Throwable) {
-                            holder.isPublicSwitch!!.isChecked = false
                         }
 
                         override fun onResponse(call: Call<Job>, response: Response<Job>) {
                             if(response.code() == 200) {
                                 Toast.makeText(context, "Job is public now.", Toast.LENGTH_LONG).show()
-                            } else {
-                                holder.isPublicSwitch!!.isChecked = false
                             }
                         }
 
@@ -209,14 +206,11 @@ class JobsAdapter(
                     val call = s!!.deleteJobPost(jv.job.id.toString())
                     call.enqueue(object: Callback<Job> {
                         override fun onFailure(call: Call<Job>, t: Throwable) {
-                            holder.isPublicSwitch!!.isChecked = true
                         }
 
                         override fun onResponse(call: Call<Job>, response: Response<Job>) {
                             if (response.code() == 200) {
                                 Toast.makeText(context, "Job is private now.", Toast.LENGTH_LONG).show()
-                            } else {
-                                holder.isPublicSwitch!!.isChecked = true
                             }
                         }
                     })

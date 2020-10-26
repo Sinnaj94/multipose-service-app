@@ -16,6 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import de.jannis_jahr.motioncapturingapp.JobDetailActivity
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.ui.JobsRequestType
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
@@ -42,7 +43,8 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         val sharedPrefs = requireContext().getSharedPreferences(
             ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
-        jobsViewModel = JobsViewModel(sharedPrefs, false, resultCode)
+
+        jobsViewModel = JobsViewModel(sharedPrefs, JobsRequestType.DASHBOARD, resultCode)
 
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_finished_jobs, container, false)

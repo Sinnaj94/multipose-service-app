@@ -72,4 +72,7 @@
     <string name="add_tag">Add tag</string>
     <string name="string_public">Public</string>
     <string name="bookmark">Bookmark</string>
+    <string name="no_items">No Items</string>
+    <string name="no_items_detail">You have not saved anything into your collection yet</string>
+    <string name="title_bookmarks">Bookmarks</string>
 </resources>

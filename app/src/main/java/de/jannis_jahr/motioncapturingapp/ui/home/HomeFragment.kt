@@ -14,10 +14,12 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
+import de.jannis_jahr.motioncapturingapp.ui.JobsRequestType
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
 import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsViewModel
 import de.jannis_jahr.motioncapturingapp.ui.view.JobListTagsObserver
 import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
+import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import kotlinx.android.synthetic.main.fragment_home.*
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTagsObserver{
@@ -37,7 +39,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
         )
         tagList = TagList(sharedPrefs)
         setHasOptionsMenu(true)
-        jobsViewModel = JobsViewModel(sharedPrefs, true, null, tagList)
+        val manager = NetworkUtils.getService(sharedPrefs)
+        jobsViewModel = JobsViewModel(sharedPrefs, JobsRequestType.JOBS, null, tagList)
         val v = inflater.inflate(R.layout.fragment_home, container, false)
         jobList = v.findViewById(R.id.posts_list)
         myJobs = arrayListOf<JobViewHolder>()
