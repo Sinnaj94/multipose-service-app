@@ -4,7 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 
-class JobViewHolder(val job: Job) {
+class JobViewHolder(var job: Job) {
     var imageBinderHandler : Handler
     var progressHandler : Handler
 

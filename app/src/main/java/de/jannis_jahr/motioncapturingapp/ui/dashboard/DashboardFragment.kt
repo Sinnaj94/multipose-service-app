@@ -111,7 +111,6 @@ class DashboardFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == VIDEO_CODE && resultCode == Activity.RESULT_OK) {
-            Toast.makeText(context, "Welcome sir", Toast.LENGTH_SHORT).show()
             val sendJob = Intent(context, SendJobActivity::class.java)
             sendJob.data = data!!.data
             startActivityForResult(sendJob, SEND_CODE)

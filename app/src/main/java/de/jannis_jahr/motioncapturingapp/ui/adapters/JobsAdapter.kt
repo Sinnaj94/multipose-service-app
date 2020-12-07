@@ -1,10 +1,7 @@
 package de.jannis_jahr.motioncapturingapp.ui.adapters
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
-import android.media.MediaParser
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -19,7 +16,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -32,7 +28,6 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.authentication.BasicAuthorization
-import de.jannis_jahr.motioncapturingapp.network.services.model.Bookmark
 import de.jannis_jahr.motioncapturingapp.network.services.model.BookmarkStatus
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
@@ -44,13 +39,7 @@ import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.OutputStream
-import java.io.PrintWriter
-import java.net.Socket
 import java.text.SimpleDateFormat
-import kotlin.system.exitProcess
 
 class JobsAdapter(
         context: Context, resource: Int, list: ArrayList<JobViewHolder>, override var observer: JobListTagsObserver?
@@ -74,11 +63,32 @@ class JobsAdapter(
         var bookmarkState = false
         var description: TextView? = view?.findViewById(R.id.my_job_description)
         var tags: ChipGroup? = view?.findViewById(R.id.tag_group)
-        var isPublicSwitch: Switch? = view?.findViewById(R.id.is_public)
+        var isPublicButton: ImageButton? = view?.findViewById(R.id.show_public_button)
         var bookmarked: Chip? = view?.findViewById(R.id.bookmark_chip)
         var sendTo3D: ImageButton? = view?.findViewById(R.id.send_to_3d)
+        var spinner: Spinner? = view?.findViewById(R.id.job_spinner)
+        var smoothing: Spinner? = view?.findViewById(R.id.smoothing_spinner)
     }
 
+
+    fun loadWebView(webView: WebView, job: Job, peopleIndex: Int, smoothing_level: Int) {
+        val myHost = NetworkUtils.getHost(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+        val query_params =
+        when(smoothing_level) {
+            0 -> ""
+            1 -> "?border=5&u0=50"
+            2 -> "?border=5&u0=20"
+            3 -> "?border=5&u0=10"
+            4 -> "?border=5&u0=5"
+            else -> ""
+        }
+        val url = if(peopleIndex == 0) {
+            "$myHost${ApplicationConstants.BASE_ROUTE}results/${job.id}/render_html$query_params"
+        } else {
+            "$myHost${ApplicationConstants.BASE_ROUTE}results/${job.id}/render_html/$peopleIndex$query_params"
+        }
+        webView.loadUrl(url)
+    }
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -94,7 +104,7 @@ class JobsAdapter(
             rowView = convertView
             holder = rowView.tag as ViewHolder
         }
-        val jv = list[position]
+        var jv = list[position]
         val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm");
         holder.date?.text = formatter.format(jv.job.date_updated)
         holder.name?.text = jv.job.name
@@ -114,13 +124,49 @@ class JobsAdapter(
             }
         }
         bindImage(position = jv.job, thumb = holder)
+        if(holder.spinner != null) {
+            val numPeople = jv.job.result.max_people
+            val string = arrayListOf<String>()
+            string.add("All people ($numPeople)")
+            if(numPeople > 1) {
+                for(i in 1 until numPeople + 1) {
+                    string.add("Person $i/$numPeople")
+                }
+            }
+            val spinnerArrayAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, string)
+            holder.spinner!!.adapter = spinnerArrayAdapter
+            holder.spinner!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
+
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    loadWebView(holder.webView!!, jv.job ,position, holder.smoothing!!.selectedItemPosition)
+                }
+
+            }
+        }
+        if(holder.smoothing != null) {
+            val strings = context.resources.getStringArray(R.array.smoothing_strings)
+            val spinnerArrayAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, strings)
+            holder.smoothing!!.adapter = spinnerArrayAdapter
+            // TODO: Machen
+            holder.smoothing!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
+
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    loadWebView(holder.webView!!, jv.job ,holder.spinner!!.selectedItemPosition, position)
+                }
+
+            }
+        }
         if(holder.webView != null) {
             holder.webView?.settings!!.javaScriptEnabled = true
             holder.webView?.settings!!.domStorageEnabled = true
             holder.webView?.settings!!.databaseEnabled = true
             val myHost = NetworkUtils.getHost(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
+            // TODO: 1 raus
             holder.webView?.loadUrl("$myHost${ApplicationConstants.BASE_ROUTE}results/${jv.job.id}/render_html")
-
         }
 
         if(holder.bookmarkView != null) {
@@ -184,25 +230,16 @@ class JobsAdapter(
 
         }
 
-        if(holder.isPublicSwitch != null) {
-            holder.isPublicSwitch!!.isChecked = jv.job.public
+        if(holder.isPublicButton != null) {
+            if(jv.job.public) {
+                holder.isPublicButton!!.setImageResource(R.drawable.ic_baseline_people_24)
+            } else {
+                holder.isPublicButton!!.setImageResource(R.drawable.ic_baseline_lock_24)
+            }
             val s = NetworkUtils.getService(context.getSharedPreferences(ApplicationConstants.PREFERENCES,
                     Context.MODE_PRIVATE))
-            holder.isPublicSwitch!!.setOnCheckedChangeListener { buttonView, isChecked ->
-                if(isChecked) {
-                    val call = s!!.postJob(jv.job.id.toString())
-                    call.enqueue(object: Callback<Job> {
-                        override fun onFailure(call: Call<Job>, t: Throwable) {
-                        }
-
-                        override fun onResponse(call: Call<Job>, response: Response<Job>) {
-                            if(response.code() == 200) {
-                                Toast.makeText(context, "Job is public now.", Toast.LENGTH_LONG).show()
-                            }
-                        }
-
-                    })
-                } else {
+            holder.isPublicButton!!.setOnClickListener {
+                if(jv.job.public) {
                     val call = s!!.deleteJobPost(jv.job.id.toString())
                     call.enqueue(object: Callback<Job> {
                         override fun onFailure(call: Call<Job>, t: Throwable) {
@@ -210,11 +247,33 @@ class JobsAdapter(
 
                         override fun onResponse(call: Call<Job>, response: Response<Job>) {
                             if (response.code() == 200) {
+                                jv.job = response.body()!!
+                                holder.isPublicButton!!.setImageResource(R.drawable.ic_baseline_lock_24)
                                 Toast.makeText(context, "Job is private now.", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(context, response.message(), Toast.LENGTH_SHORT).show()
                             }
                         }
                     })
+                } else {
+                    val call = s!!.postJob(jv.job.id.toString())
+                    call.enqueue(object: Callback<Job> {
+                        override fun onFailure(call: Call<Job>, t: Throwable) {
+                        }
+
+                        override fun onResponse(call: Call<Job>, response: Response<Job>) {
+                            if(response.code() == 200) {
+                                jv.job = response.body()!!
+                                holder.isPublicButton!!.setImageResource(R.drawable.ic_baseline_people_24)
+                                Toast.makeText(context, "Job is public now.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, response.message(), Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                    })
                 }
+
             }
         }
 
@@ -268,7 +327,7 @@ class JobsAdapter(
                 val f = SendToAnimationDialogFragment()
 
                 val args = Bundle()
-                args.putString("url", jv.job.result.output_bvh)
+                args.putString("url", "${jv.job.result.output_bvh}/1")
                 f.arguments = args
 
                 f.show(ft, "dialog")

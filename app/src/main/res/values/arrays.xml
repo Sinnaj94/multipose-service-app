@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="smoothing_strings">
+        <item>No smoothing</item>
+        <item>Light smoothing</item>
+        <item>Medium smoothing</item>
+        <item>Strong smoothing</item>
+        <item>Super smoothing</item>
+    </string-array>
+</resources>

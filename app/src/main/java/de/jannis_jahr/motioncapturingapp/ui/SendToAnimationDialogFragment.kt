@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.chip.Chip
@@ -17,6 +19,7 @@ import de.jannis_jahr.motioncapturingapp.R
 import de.jannis_jahr.motioncapturingapp.network.services.model.Job
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
+import kotlinx.android.synthetic.main.fragment_finished_jobs.view.*
 import java.io.BufferedWriter
 import java.io.IOException
 import java.io.OutputStream
@@ -74,6 +77,12 @@ class SendToAnimationDialogFragment : DialogFragment() {
 
                 }
             }
+            this@SendToAnimationDialogFragment.requireActivity().runOnUiThread {
+                v.findViewById<ProgressBar>(R.id.spinner3d).visibility = View.GONE
+                v.findViewById<TextView>(R.id.title3d).text = "Searching complete"
+            }
+
+
         }
         t.start()
 

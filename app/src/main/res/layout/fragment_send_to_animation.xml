@@ -5,7 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="32dp">
+    <TextView
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/title3d"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Searching for 3D Softwares in your network..."></TextView>
 
+    <ProgressBar
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/title3d"
+        android:id="@+id/spinner3d"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/animation_software_group"
@@ -14,7 +29,7 @@
         android:layout_margin="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/spinner3d"
         app:singleSelection="true">
 
     </com.google.android.material.chip.ChipGroup>

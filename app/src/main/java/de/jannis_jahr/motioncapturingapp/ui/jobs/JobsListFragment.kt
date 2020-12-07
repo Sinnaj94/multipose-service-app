@@ -15,6 +15,7 @@ import androidx.lifecycle.observe
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import de.jannis_jahr.motioncapturingapp.JobDetailActivity
 import de.jannis_jahr.motioncapturingapp.R
+import de.jannis_jahr.motioncapturingapp.network.services.model.JobStatistics
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.JobsRequestType
 import de.jannis_jahr.motioncapturingapp.ui.adapters.JobsAdapter
@@ -31,6 +32,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
     // TODO: Rename and change types of parameters
     private lateinit var jobList : ListView
     lateinit var myJobs : ArrayList<JobViewHolder>
+    lateinit var adapter : JobsAdapter
     private lateinit var jobsViewModel: JobsViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +53,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         jobList = v.findViewById<ListView>(R.id.job_list)
         registerForContextMenu(jobList)
         myJobs = arrayListOf<JobViewHolder>()
-        val adapter = JobsAdapter(requireContext(), R.layout.list_item_jobs, myJobs, null)
+        adapter = JobsAdapter(requireContext(), R.layout.big_list_item_jobs, myJobs, null)
         jobList.adapter = adapter
         jobList.emptyView = v.findViewById(R.id.jobs_placeholder)
         jobsViewModel.getJobs().observe(viewLifecycleOwner) { item ->
@@ -66,6 +68,8 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         jobList.setOnItemClickListener { _, _, i, l ->
             onJobsTap(i)
         }
+        loadStats()
+
         return v
     }
 
@@ -75,6 +79,40 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
             pull_refresh.isRefreshing = it
         }
         pull_refresh.setOnRefreshListener(this)
+        // Remove jobs on click
+        num_failed.setOnClickListener {
+            val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+                when (which) {
+                    DialogInterface.BUTTON_POSITIVE -> {
+                        Toast.makeText(context, "Deleted failed jobs.", Toast.LENGTH_SHORT).show()
+                        loadStats()
+                        val ser = NetworkUtils.getService(requireContext().getSharedPreferences(
+                                ApplicationConstants.PREFERENCES,
+                                Context.MODE_PRIVATE
+                        ))
+                        val call = ser!!.deleteFailedJobs()
+                        call.enqueue(object : Callback<Int> {
+                            override fun onFailure(call: Call<Int>, t: Throwable) {
+
+                            }
+
+                            override fun onResponse(call: Call<Int>, response: Response<Int>) {
+                                if(response.code() == 200) {
+                                    loadStats()
+                                }
+                            }
+
+                        })
+                    }
+                    DialogInterface.BUTTON_NEGATIVE -> {
+                    }
+                }
+            }
+
+            val builder = AlertDialog.Builder(context)
+            builder.setMessage("These job have failed. Delete them?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show()
+        }
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -106,11 +144,42 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
 
     override fun onResume() {
         super.onResume()
+        adapter.clear()
+        adapter.notifyDataSetChanged()
         jobsViewModel.loadJobs()
+        loadStats()
     }
 
     override fun onRefresh() {
         jobsViewModel.loadJobs()
+        loadStats()
+    }
+
+    fun loadStats() {
+        // Load statistics
+        val ser = NetworkUtils.getService(requireContext().getSharedPreferences(
+                ApplicationConstants.PREFERENCES,
+                Context.MODE_PRIVATE
+        ))
+        val call = ser!!.getJobStatistics()
+        call.enqueue(object: Callback<JobStatistics> {
+            override fun onFailure(call: Call<JobStatistics>, t: Throwable) {
+
+            }
+
+            override fun onResponse(call: Call<JobStatistics>, response: Response<JobStatistics>) {
+                if(response.code() == 200) {
+                    if(response.body()!!.failed == 0 && response.body()!!.pending == 0) {
+                        other_categories.visibility = View.GONE
+                    } else {
+                        other_categories.visibility = View.VISIBLE
+                        num_failed.text = "Failed Jobs: ${response.body()!!.failed}"
+                        num_pending.text = "Pending Jobs: ${response.body()!!.pending}"
+                    }
+                }
+            }
+
+        })
     }
 
     fun showJobDetail(position: Int) {
@@ -146,6 +215,8 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
 
                         override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                             if(response.code() == 200) {
+                                adapter.clear()
+                                adapter.notifyDataSetChanged()
                                 jobsViewModel.loadJobs()
                             }
                         }
@@ -163,7 +234,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
 
 class FinishedJobsFragment: JobsListFragment() {
     override var resultCode: Int?
-        get() = null
+        get() = 1
         set(value) {}
 
     override fun onJobsTap(position: Int) {

@@ -7,21 +7,34 @@
              android:layout_height="match_parent"
              android:id="@+id/frame_layout"
              tools:context=".ui.jobs.JobsListFragment">
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <LinearLayout
+        android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:id="@+id/pull_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:background="@color/exo_white"
+        android:id="@+id/other_categories"
+        android:visibility="gone"
+        android:paddingLeft="10dp"
+        android:elevation="8dp"
+        android:paddingRight="10dp"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/num_pending"
+            android:backgroundTint="@android:color/holo_orange_light"
+            android:textColor="@color/pure_black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 Pending Job" android:layout_marginRight="10dp"/>
+        <Button
+            android:id="@+id/num_failed"
+            android:backgroundTint="@android:color/holo_red_light"
+            android:textColor="@color/exo_white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1 Failed Job"/>
 
-        <ListView
-            android:id="@+id/job_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@drawable/empty_tall_divider"
-            tools:listitem="@layout/list_item_jobs" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:id="@+id/jobs_placeholder"
@@ -57,4 +70,19 @@
             android:textSize="12sp"
             />
     </LinearLayout>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        app:layout_constraintTop_toBottomOf="@id/other_categories"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/pull_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <ListView
+            android:id="@+id/job_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@drawable/empty_tall_divider"
+            tools:listitem="@layout/big_list_item_jobs" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

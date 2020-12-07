@@ -7,6 +7,7 @@ data class Result(
     val id: String,
     val result_code: Int,
     val date: Date,
+    val max_people: Int,
     val output_video_url: String,
     val output_bvh: String
 )

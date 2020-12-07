@@ -47,7 +47,7 @@ class JobsViewModel(
 
         val call = when(type) {
             JobsRequestType.JOBS -> request!!.getPosts(tags)
-            JobsRequestType.DASHBOARD -> request!!.getJobs(null)
+            JobsRequestType.DASHBOARD -> request!!.getJobs(resultCode)
             JobsRequestType.BOOKMARKS -> request!!.getCollection(tags)
         }
 
@@ -73,7 +73,7 @@ class JobsViewModel(
 
         val call = when(type) {
             JobsRequestType.JOBS -> request!!.getPosts(null)
-            JobsRequestType.DASHBOARD -> request!!.getJobs(null)
+            JobsRequestType.DASHBOARD -> request!!.getJobs(resultCode)
             JobsRequestType.BOOKMARKS -> request!!.getCollection(null)
         }
 

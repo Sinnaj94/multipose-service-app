@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -28,18 +29,22 @@ import retrofit2.Response
 class SendJobActivity : AppCompatActivity() {
     var fileURI : Uri? = null
     var tagList: ArrayList<String> = arrayListOf()
+    var player: ExoPlayer? = null
     override fun onBackPressed() {
         exit()
     }
 
     private fun exit() {
         setResult(Activity.RESULT_CANCELED)
+        player?.stop()
         finish()
     }
 
     private fun send() {
         val service = NetworkUtils.getService(applicationContext.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
         fullUploadJob(service!!, fileURI!!)
+        player?.stop()
+        player
     }
 
     private fun fullUploadJob(service: MocapService, file: Uri) {
@@ -81,12 +86,12 @@ class SendJobActivity : AppCompatActivity() {
         setContentView(R.layout.activity_send_job)
         setContentView(R.layout.activity_send_job)
         fileURI = intent.data
-        val player = SimpleExoPlayer.Builder(applicationContext).build()
+        player = SimpleExoPlayer.Builder(applicationContext).build()
         val vid = MediaItem.fromUri(fileURI!!)
-        player.setMediaItem(vid)
-        player.repeatMode = Player.REPEAT_MODE_ALL
-        player.prepare()
-        player.play()
+        player!!.setMediaItem(vid)
+        player!!.repeatMode = Player.REPEAT_MODE_ALL
+        player!!.prepare()
+        player!!.play()
         video_view.player = player
         // Show home as up
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

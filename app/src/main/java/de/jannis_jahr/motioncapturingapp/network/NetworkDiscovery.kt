@@ -14,7 +14,7 @@ import java.net.Socket
 
 class NetworkDiscovery : Runnable {
     var serverRange = "192.168.178."
-    var port = 5000
+    var port = 80
     var running = true
     val id = "motion_capturing_api"
     var listener : NetworkDiscoveryListener? = null
@@ -45,7 +45,7 @@ class NetworkDiscovery : Runnable {
 
     private fun validateNetwork(adr: InetSocketAddress): Boolean {
         // TODO: Persist the address on connect.
-        val host = "http:/${adr.address}:${adr.port}"
+        val host = "http:/${adr.address}"
         val fullHost = "${host}${ApplicationConstants.BASE_ROUTE}"
 
         ServiceBuilder.buildRetrofit(fullHost)
