@@ -20,7 +20,7 @@ interface MocapService {
     @GET("users/login")
     fun login() : Call<User>
 
-    @GET("auth/token")
+    @GET("users/token")
     fun authorize() : Call<Token>
 
     @FormUrlEncoded
