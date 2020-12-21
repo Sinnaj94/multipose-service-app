@@ -45,10 +45,10 @@
 
 
     <string name="onboarding_1_title">Welcome!</string>
-    <string name="onboarding_1_text">With this app you can easily create Motion Capturing data from videos</string>
+    <string name="onboarding_1_text">Hey! With this app you can easily create Motion Capturing data from videos. The cloud will take care of the analysis.</string>
 
     <string name="onboarding_2_title">How it works</string>
-    <string name="onboarding_2_text">Just take a video and upload it! Please make sure there is only one person in the videos!</string>
+    <string name="onboarding_2_text">Just take a video and upload it! Always make sure that the people you record are fully visible. </string>
 
     <string name="onboarding_3_title">That\'s it!</string>
     <string name="onboarding_3_text">Now it\'s time to experiment.</string>

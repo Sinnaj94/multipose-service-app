@@ -52,6 +52,10 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
             finish()
             val i = Intent(applicationContext, LoginActivity::class.java)
             startActivity(i)
+        } else if(item.itemId == R.id.reset_state) {
+            val prefs = getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE).edit()
+            prefs.putBoolean(ApplicationConstants.PREFERENCE_INTRO_FINISHED, false)
+            prefs.apply()
         }
         return false
     }

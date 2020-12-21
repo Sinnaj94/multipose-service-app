@@ -5,7 +5,7 @@ import java.util.*
 
 data class Bookmark (
     val category: String,
-    val user_id: UUID,
-    val job_id: UUID,
-    val count: UUID
+    val user_id: Int,
+    val job_id: Int,
+    val count: Int
 )

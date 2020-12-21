@@ -240,7 +240,7 @@ class JobsAdapter(
                     Context.MODE_PRIVATE))
             holder.isPublicButton!!.setOnClickListener {
                 if(jv.job.public) {
-                    val call = s!!.deleteJobPost(jv.job.id.toString())
+                    val call = s!!.deleteJobPost(jv.job.id)
                     call.enqueue(object: Callback<Job> {
                         override fun onFailure(call: Call<Job>, t: Throwable) {
                         }
@@ -256,7 +256,7 @@ class JobsAdapter(
                         }
                     })
                 } else {
-                    val call = s!!.postJob(jv.job.id.toString())
+                    val call = s!!.postJob(jv.job.id)
                     call.enqueue(object: Callback<Job> {
                         override fun onFailure(call: Call<Job>, t: Throwable) {
                         }
@@ -284,7 +284,7 @@ class JobsAdapter(
                 val s = NetworkUtils.getService(context.getSharedPreferences(ApplicationConstants.PREFERENCES,
                         Context.MODE_PRIVATE))
                 if(isChecked) {
-                    val call = s!!.postBookmark(jv.job.id.toString())
+                    val call = s!!.postBookmark(jv.job.id)
                     call.enqueue(object: Callback<BookmarkStatus> {
                         override fun onFailure(call: Call<BookmarkStatus>, t: Throwable) {
                         }
@@ -297,7 +297,7 @@ class JobsAdapter(
 
                     })
                 } else {
-                    val call = s!!.deleteBookmark(jv.job.id.toString())
+                    val call = s!!.deleteBookmark(jv.job.id)
                     call.enqueue(object: Callback<BookmarkStatus> {
                         override fun onFailure(call: Call<BookmarkStatus>, t: Throwable) {
                         }

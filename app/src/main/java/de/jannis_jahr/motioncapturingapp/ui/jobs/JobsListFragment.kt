@@ -188,7 +188,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
             0 -> return
             1 -> {
                 val intent = Intent(context, JobDetailActivity::class.java)
-                intent.putExtra("id", myJobs[position].job.id.toString())
+                intent.putExtra("id", myJobs[position].job.id)
                 intent.putExtra("title", myJobs[position].job.name)
                 requireActivity().startActivity(intent)
             }
@@ -208,7 +208,7 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
                             NetworkUtils.getService(requireContext().getSharedPreferences(
                                     ApplicationConstants.PREFERENCES,
                                     Context.MODE_PRIVATE))
-                    val call = service!!.deleteJob(myJobs[position].job.id.toString())
+                    val call = service!!.deleteJob(myJobs[position].job.id)
                     call.enqueue(object: Callback<Boolean> {
                         override fun onFailure(call: Call<Boolean>, t: Throwable) {
                         }

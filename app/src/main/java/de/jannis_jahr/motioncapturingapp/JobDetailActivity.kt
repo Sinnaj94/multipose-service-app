@@ -22,11 +22,11 @@ import retrofit2.Response
 
 class JobDetailActivity : AppCompatActivity() {
     lateinit var navController:NavController
-    var id : String? = null
+    var id : Int? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         title = intent.getStringExtra("title")!!
-        id = intent.getStringExtra("id")!!
+        id = intent.getIntExtra("id", -1)!!
         setContentView(R.layout.activity_job_detail)
 
         val navView: BottomNavigationView = findViewById(R.id.nav_view_detail)
@@ -41,7 +41,7 @@ class JobDetailActivity : AppCompatActivity() {
         )
         val inflater = navController.navInflater
         val graph = inflater.inflate(R.navigation.mobile_navigation_detail)
-        val idArgument = NavArgument.Builder().setDefaultValue(intent.getStringExtra("id")!!).build()
+        val idArgument = NavArgument.Builder().setDefaultValue(intent.getIntExtra("id", -1)).build()
         graph.addArgument("id", idArgument)
         navController.graph = graph
         setupActionBarWithNavController(navController, appBarConfiguration)

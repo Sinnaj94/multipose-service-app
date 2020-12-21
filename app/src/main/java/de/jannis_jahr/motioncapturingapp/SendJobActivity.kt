@@ -64,7 +64,7 @@ class SendJobActivity : AppCompatActivity() {
                 if(response.code() == 200) {
                     Toast.makeText(applicationContext, "Job \"${response.body()?.name}\" was created", Toast.LENGTH_SHORT).show()
                     val intent = Intent()
-                    intent.putExtra("id", response.body()?.id.toString())
+                    intent.putExtra("id", response.body()?.id)
                     intent.data = file
                     setResult(Activity.RESULT_OK, intent)
                     finish()

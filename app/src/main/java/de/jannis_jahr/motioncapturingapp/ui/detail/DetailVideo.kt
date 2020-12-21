@@ -35,7 +35,7 @@ private const val ARG_ID = "id"
 
 open class DetailVideo : Fragment() {
     // TODO: Rename and change types of parameters
-    private var id: String? = null
+    private var id: Int? = null
     val instanceType = this
 
     lateinit var prefs : SharedPreferences
@@ -43,7 +43,7 @@ open class DetailVideo : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            id = it.getString(ARG_ID)
+            id = it.getInt(ARG_ID)
         }
         prefs = requireContext().getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE)
         service = NetworkUtils.getService(prefs)!!

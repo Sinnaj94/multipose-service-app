@@ -5,5 +5,9 @@
             android:id="@+id/logout"
             android:icon="@drawable/ic_baseline_exit_to_app_24"
             android:title="@string/action_logout"/>
+    <item
+        android:id="@+id/reset_state"
+        android:title="Reset State"
+        ></item>
 
 </menu>

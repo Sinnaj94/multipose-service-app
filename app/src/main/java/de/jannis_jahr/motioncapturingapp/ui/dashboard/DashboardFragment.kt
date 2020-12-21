@@ -80,7 +80,7 @@ class DashboardFragment : Fragment() {
         tabs.setupWithViewPager(viewpager_main)*/
     }
 
-    private fun uploadVideo(service: MocapService, uri: Uri, id: String) {
+    private fun uploadVideo(service: MocapService, uri: Uri, id: Int) {
         //val video = RequestBody.create("video/mp4", )
         val file = File(RealPathUtil.getRealPath(context, uri))
         val video_file = RequestBody.create(MediaType.parse("video/mp4"), file)
@@ -117,7 +117,7 @@ class DashboardFragment : Fragment() {
         } else if(requestCode == SEND_CODE && resultCode == Activity.RESULT_OK) {
             // Send video
             val service = NetworkUtils.getService(requireContext().getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
-            uploadVideo(service!!, data!!.data!!, data.getStringExtra("id")!!)
+            uploadVideo(service!!, data!!.data!!, data.getIntExtra("id", -1))
         }
     }
 }

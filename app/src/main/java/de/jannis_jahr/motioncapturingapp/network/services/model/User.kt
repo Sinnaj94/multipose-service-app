@@ -4,6 +4,6 @@ import java.util.*
 
 data class User(
     val username: String,
-    val id: String,
+    val id: Int,
     val registration_date: Date
 )

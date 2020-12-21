@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class Job (
-    val id: UUID,
+    val id: Int,
     val name: String,
     val description: String,
     val video_uploaded: Boolean,

@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 data class Result(
-    val id: String,
+    val id: Int,
     val result_code: Int,
     val date: Date,
     val max_people: Int,
