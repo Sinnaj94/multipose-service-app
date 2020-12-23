@@ -123,7 +123,7 @@ class JobsAdapter(
                 holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_report_problem_24)
             }
         }
-        bindImage(position = jv.job, thumb = holder)
+        //bindImage(position = jv.job, thumb = holder)
         if(holder.spinner != null) {
             val numPeople = jv.job.result.max_people
             val string = arrayListOf<String>()

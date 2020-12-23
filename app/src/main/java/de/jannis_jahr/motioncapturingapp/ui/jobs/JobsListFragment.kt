@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.AdapterView.AdapterContextMenuInfo
@@ -29,6 +32,8 @@ import retrofit2.Response
 
 abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener{
     abstract var resultCode: Int?
+    var currentNumPending:Int? = null
+    var handler:Handler? = null
     // TODO: Rename and change types of parameters
     private lateinit var jobList : ListView
     lateinit var myJobs : ArrayList<JobViewHolder>
@@ -155,8 +160,12 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
         loadStats()
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        handler?.removeCallbacksAndMessages(null)
+    }
+
     fun loadStats() {
-        // Load statistics
         val ser = NetworkUtils.getService(requireContext().getSharedPreferences(
                 ApplicationConstants.PREFERENCES,
                 Context.MODE_PRIVATE
@@ -168,6 +177,9 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
             }
 
             override fun onResponse(call: Call<JobStatistics>, response: Response<JobStatistics>) {
+                if(other_categories == null) {
+                    return
+                }
                 if(response.code() == 200) {
                     if(response.body()!!.failed == 0 && response.body()!!.pending == 0) {
                         other_categories.visibility = View.GONE
@@ -175,6 +187,23 @@ abstract class JobsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListen
                         other_categories.visibility = View.VISIBLE
                         num_failed.text = "Failed Jobs: ${response.body()!!.failed}"
                         num_pending.text = "Pending Jobs: ${response.body()!!.pending}"
+                        if(response.body()!!.pending > 0) {
+                            // Autorefresh
+                            if(handler != null) {
+                                handler!!.removeCallbacksAndMessages(null);
+                            }
+                            handler = Handler(Looper.getMainLooper())
+                            handler!!.postDelayed({
+                                loadStats()
+                            }, 1000)
+                            if(currentNumPending == null) {
+                                currentNumPending = response.body()!!.pending;
+                            }
+                            if (response.body()!!.pending < currentNumPending!!) {
+                                Toast.makeText(context, "Yay, a new Job has finished. Pull to reload.", Toast.LENGTH_SHORT).show()
+                            }
+                            currentNumPending = response.body()!!.pending
+                        }
                     }
                 }
             }
