@@ -25,7 +25,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
+/**
+ * Send videos to the server to create analysis jobs
+ */
 class SendJobActivity : AppCompatActivity() {
     var fileURI : Uri? = null
     var tagList: ArrayList<String> = arrayListOf()
@@ -34,34 +36,42 @@ class SendJobActivity : AppCompatActivity() {
         exit()
     }
 
+    /**
+     * Exit this view
+     */
     private fun exit() {
         setResult(Activity.RESULT_CANCELED)
         player?.stop()
         finish()
     }
 
+    /**
+     * Upload the job to the server
+     */
     private fun send() {
         val service = NetworkUtils.getService(applicationContext.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
         fullUploadJob(service!!, fileURI!!)
         player?.stop()
-        player
     }
 
+    /**
+     * Build a call to upload a video with name and tags
+     */
     private fun fullUploadJob(service: MocapService, file: Uri) {
-        // Create "Job" Object
-        // TODO: Name
+        // Create "Job" Object and define a name
         var name : String = if(!job_name.text.isBlank()) {
             job_name.text.toString()
         } else {
             "My Job"
         }
 
-
+        // Build the call and enqueue it
         val call = service.addJob(name, tagList)
         call.enqueue(object : Callback<Job> {
             override fun onResponse(call: Call<Job>, response: Response<Job>) {
 
                 if(response.code() == 200) {
+                    // Success: Show the user that everything worked fine
                     Toast.makeText(applicationContext, "Job \"${response.body()?.name}\" was created", Toast.LENGTH_SHORT).show()
                     val intent = Intent()
                     intent.putExtra("id", response.body()?.id)
@@ -69,11 +79,13 @@ class SendJobActivity : AppCompatActivity() {
                     setResult(Activity.RESULT_OK, intent)
                     finish()
                 } else {
+                    // Error Case
                     Toast.makeText(applicationContext, "Job \"${response.body()?.name}\" could not be created", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<Job>, t: Throwable) {
+                // Network errors etc.
                 Toast.makeText(applicationContext, "Something went wrong", Toast.LENGTH_SHORT).show()
                 t.printStackTrace()
             }
@@ -83,8 +95,10 @@ class SendJobActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Set the content view
         setContentView(R.layout.activity_send_job)
-        setContentView(R.layout.activity_send_job)
+
+        // build the player and play the video
         fileURI = intent.data
         player = SimpleExoPlayer.Builder(applicationContext).build()
         val vid = MediaItem.fromUri(fileURI!!)
@@ -93,6 +107,7 @@ class SendJobActivity : AppCompatActivity() {
         player!!.prepare()
         player!!.play()
         video_view.player = player
+
         // Show home as up
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
@@ -101,6 +116,7 @@ class SendJobActivity : AppCompatActivity() {
             addTag()
         }
 
+        // Add tags by clicking +
         job_tag.setOnKeyListener { v, keyCode, event ->
             if(event.action == KeyEvent.ACTION_DOWN &&
                     keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -111,6 +127,9 @@ class SendJobActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Adds a tag to the list
+     */
     fun addTag() {
         if(!job_tag.text.isEmpty()) {
             val addedText = job_tag.text.toString().toLowerCase().trim()
@@ -131,6 +150,7 @@ class SendJobActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
+            // Exit or send
             android.R.id.home -> onBackPressed()
             R.id.send_to_server -> send()
         }

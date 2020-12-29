@@ -23,7 +23,9 @@ import de.jannis_jahr.motioncapturingapp.ui.observers.AddVideoObserver
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import kotlinx.android.synthetic.main.activity_main.*
 
-
+/**
+ * Access jobs via feed, dashboard and bookmarks
+ */
 class MainActivity : AppCompatActivity(), AddVideoObserver {
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
         setContentView(R.layout.activity_main)
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
 
+        // Build navigation controller
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
                 R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_user
             )
         )
+        // Setup the action bar
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -47,6 +51,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Check if an options item (right top) was selected, logout and reset state for debugging purposes
         if(item.itemId == R.id.logout) {
             NetworkUtils.logout(getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
             finish()
@@ -67,6 +72,7 @@ class MainActivity : AppCompatActivity(), AddVideoObserver {
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun askExternalStoragePermission() {
+        // Ask for Storage permissions, to access videos
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
 

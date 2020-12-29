@@ -13,6 +13,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/**
+ * Observable JobsViewModel which loads the jobs from the server and notifies observers
+ */
 class JobsViewModel(
     private val sharedPreferences: SharedPreferences,
     private val type: JobsRequestType,
@@ -25,6 +28,9 @@ class JobsViewModel(
 
 
     // Example: https://developer.android.com/topic/libraries/architecture/viewmodel
+    /**
+     * MutableLiveData allows to be observed
+     */
     private val jobs: MutableLiveData<List<Job>> by lazy {
         MutableLiveData<List<Job>>().also {
             if(tags != null) {
@@ -37,20 +43,28 @@ class JobsViewModel(
 
     val isRefreshing: MutableLiveData<Boolean> = MutableLiveData<Boolean>()
 
+    /**
+     * return the jobs
+     */
     fun getJobs(): LiveData<List<Job>> {
         return jobs
     }
 
+    /**
+     * load jobs from the rest server with tags
+     */
     public fun loadJobs(tags : ArrayList<String>) {
         isRefreshing.value = true
         val request = getService(sharedPreferences)
 
         val call = when(type) {
+            // Check the type so the right call can be executed
             JobsRequestType.JOBS -> request!!.getPosts(tags)
             JobsRequestType.DASHBOARD -> request!!.getJobs(resultCode)
             JobsRequestType.BOOKMARKS -> request!!.getCollection(tags)
         }
 
+        // Make the call and refresh the jobs.value observable attribute
         call.enqueue(object: Callback<List<Job>> {
             override fun onFailure(call: Call<List<Job>>, t: Throwable) {
                 isRefreshing.value = false
@@ -66,17 +80,22 @@ class JobsViewModel(
         })
     }
 
+    /**
+     * Load jobs from the rest server
+     */
     public fun loadJobs() {
         isRefreshing.value = true
         // Do an asynchronous operation to fetch users.
         val request = getService(sharedPreferences)
 
         val call = when(type) {
+            // Check the type so the right call can be executed
             JobsRequestType.JOBS -> request!!.getPosts(null)
             JobsRequestType.DASHBOARD -> request!!.getJobs(resultCode)
             JobsRequestType.BOOKMARKS -> request!!.getCollection(null)
         }
 
+        // Make the call and refresh the jobs.value observable attribute
         call.enqueue(object: Callback<List<Job>> {
             override fun onResponse(call: Call<List<Job>>, response: Response<List<Job>>) {
                 isRefreshing.value = false

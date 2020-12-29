@@ -1,5 +1,6 @@
 package de.jannis_jahr.motioncapturingapp.ui.dashboard
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
@@ -35,7 +38,9 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 
-
+/**
+ * Fragment where the user can see his own jobs and send videos to the server
+ */
 class DashboardFragment : Fragment() {
 
     private val TAG = "JOBS"
@@ -54,14 +59,21 @@ class DashboardFragment : Fragment() {
         val record : FloatingActionButton = root.findViewById(R.id.record_video)
         val upload : FloatingActionButton = root.findViewById(R.id.upload_video)
 
+        // Try to record a video
         record.setOnClickListener {
             floatingMenu.close(true)
             if (context?.packageManager?.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)!!) { // First check if camera is available in the device
-                val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                startActivityForResult(intent, VIDEO_CODE);
+                if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(this.requireActivity(), arrayOf(Manifest.permission.CAMERA), 1);
+                } else {
+                    val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
+                    startActivityForResult(intent, VIDEO_CODE);
+                }
+
             }
         }
 
+        // Choose a video from gallery
         upload.setOnClickListener {
             floatingMenu.close(true)
             val intent = Intent()

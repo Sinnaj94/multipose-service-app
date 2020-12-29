@@ -33,8 +33,11 @@ import retrofit2.Response
 
 private const val ARG_ID = "id"
 
+/**
+ * @deprecated
+ * Show a detail of the video
+ */
 open class DetailVideo : Fragment() {
-    // TODO: Rename and change types of parameters
     private var id: Int? = null
     val instanceType = this
 

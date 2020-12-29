@@ -14,10 +14,14 @@ import com.ramotion.paperonboarding.PaperOnboardingPage
 import de.jannis_jahr.motioncapturingapp.preferences.ApplicationConstants
 import de.jannis_jahr.motioncapturingapp.ui.login.LoginActivity
 
+/**
+ * An Activity where the User is introduced to the app via Onboarding
+ */
 class IntroActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Load different screens
         setContentView(R.layout.activity_intro)
         val step1 = PaperOnboardingPage(
             getString(R.string.onboarding_1_title), getString(R.string.onboarding_1_text), getColor(
@@ -37,14 +41,16 @@ class IntroActivity : AppCompatActivity() {
             ),
             R.drawable.atom, R.drawable.ic_baseline_arrow_forward_24
         )
-
+        // Define an onboarding fragment
         val onBoarding = PaperOnboardingFragment.newInstance(arrayListOf(step1, step2, step3))
 
+        // Replace the OnBoarding placeholder with the onboarding fragment
         val transaction: FragmentTransaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.onboarding_fragment, onBoarding)
         transaction.addToBackStack(null)
         transaction.commit()
 
+        // When the last OnBoarding screen is shown, start the Login Activity
         onBoarding.setOnRightOutListener {
             val editor = getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE).edit()
             editor.putBoolean(ApplicationConstants.PREFERENCE_INTRO_FINISHED, true)

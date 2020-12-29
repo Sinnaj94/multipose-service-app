@@ -22,28 +22,35 @@ import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import kotlinx.android.synthetic.main.fragment_home.*
 
-class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTagsObserver{
+/**
+ * See job posts from rest api
+ */
+class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTagsObserver {
 
     private lateinit var jobsViewModel: JobsViewModel
-    private lateinit var jobList : ListView
-    lateinit var myJobs : ArrayList<JobViewHolder>
-    var textCardCount : TextView? = null
+    private lateinit var jobList: ListView
+    lateinit var myJobs: ArrayList<JobViewHolder>
+    var textCardCount: TextView? = null
     private lateinit var tagList: TagList
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val sharedPrefs = requireContext().getSharedPreferences(
-            ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
+                ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
         tagList = TagList(sharedPrefs)
         setHasOptionsMenu(true)
         val manager = NetworkUtils.getService(sharedPrefs)
+
+        // Create a jobsviewmodel
         jobsViewModel = JobsViewModel(sharedPrefs, JobsRequestType.JOBS, null, tagList)
         val v = inflater.inflate(R.layout.fragment_home, container, false)
         jobList = v.findViewById(R.id.posts_list)
         myJobs = arrayListOf<JobViewHolder>()
+
+        // Register a jobsadapter
         val adapter = JobsAdapter(requireContext(), R.layout.big_list_item_jobs, myJobs, this)
         jobList.adapter = adapter
         jobList.emptyView = v.findViewById(R.id.posts_placeholder)
@@ -76,8 +83,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
         }
     }
 
+    /**
+     * Shows a badge with the number of filters
+     */
     private fun badgeSetup() {
-        if(tagList.isEmpty()) {
+        if (tagList.isEmpty()) {
             textCardCount?.visibility = View.GONE
         } else {
             textCardCount?.visibility = View.VISIBLE
@@ -86,8 +96,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.filter -> {
+                // Apply filters
                 showFilters()
                 return true
             }
@@ -95,6 +106,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
         return super.onOptionsItemSelected(item)
     }
 
+    /**
+     * Show filters so that you can search the jobs with tags
+     */
     fun showFilters() {
         val builder: AlertDialog.Builder? = activity?.let {
             AlertDialog.Builder(it)
@@ -104,7 +118,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
         val tags = v.findViewById<ChipGroup>(R.id.tags)
         val job_tag = v.findViewById<EditText>(R.id.job_tag)
         val add_tag = v.findViewById<ImageButton>(R.id.add_tag)
-        //stags.addView(tags)
+
+        // Create a dialog and let the user add filters
         builder!!.setTitle("Add filters")
                 .setPositiveButton("Apply"
                 ) { _, _ ->
@@ -112,13 +127,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
                 }
                 .setView(v)
 
+        // Add button for adding tags
         add_tag.setOnClickListener {
             addTag(job_tag.text.toString(), tags)
             job_tag.text.clear()
         }
 
+        // Pressing Enter on keyboard adds a tag
         job_tag.setOnKeyListener { v, keyCode, event ->
-            if(event.action == KeyEvent.ACTION_DOWN &&
+            if (event.action == KeyEvent.ACTION_DOWN &&
                     keyCode == KeyEvent.KEYCODE_ENTER) {
                 addTag(job_tag.text.toString(), tags)
                 job_tag.text.clear()
@@ -127,10 +144,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
             true
         }
 
-
+        // Start the dialog
         val dialog: AlertDialog? = builder.create()
 
-        for(tag in tagList) {
+        // Make all chips removeable by clicking on them
+        for (tag in tagList) {
             val chip = Chip(tags.context)
             chip.text = tag
             chip.isCloseIconVisible = true
@@ -141,20 +159,28 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
             }
             tags.addView(chip)
         }
+
+        // Show the dialog
         dialog!!.show()
     }
 
+    /**
+     * Convert tags to strings (lower case and no spaces)
+     */
     fun convertTag(job_tag: String): String? {
-        if(!job_tag.isEmpty()) {
+        if (!job_tag.isEmpty()) {
             val addedText = job_tag.toString().toLowerCase().trim()
             return addedText
         }
         return null
     }
 
+    /**
+     * adds a tag to the search
+     */
     fun addTag(job_tag: String, tags: ChipGroup) {
         val addedText = convertTag(job_tag) ?: return
-        if(tagList.contains(addedText)) return
+        if (tagList.contains(addedText)) return
         val chip = Chip(tags.context)
         chip.text = addedText
         chip.isCloseIconVisible = true
@@ -180,22 +206,31 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
         jobsViewModel.loadJobs(tagList)
     }
 
+    /**
+     * notify that a tag was added
+     */
     override fun notifyAdd(tag: String) {
-        val conv = convertTag(tag)?:return
-        if(tagList.contains(conv)) return
+        val conv = convertTag(tag) ?: return
+        if (tagList.contains(conv)) return
         tagList.add(conv)
         badgeSetup()
         jobsViewModel.loadJobs(tagList)
     }
 
+    /**
+     * notify that a tag was deleted
+     */
     override fun notifyRemove(tag: String) {
         Log.d("FILTERING", tag)
-        val conv = convertTag(tag)?:return
+        val conv = convertTag(tag) ?: return
         tagList.remove(conv)
         badgeSetup()
         jobsViewModel.loadJobs(tagList)
     }
 
+    /**
+     * class for keeping track of the tags
+     */
     class TagList(val sharedPreferences: SharedPreferences) : ArrayList<String>() {
         init {
             addAll(sharedPreferences.getStringSet(
@@ -203,6 +238,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, JobListTa
                     setOf()
             )!!.toTypedArray())
         }
+
         override fun add(element: String): Boolean {
             val edit = sharedPreferences.edit()
             val bool = super.add(element)

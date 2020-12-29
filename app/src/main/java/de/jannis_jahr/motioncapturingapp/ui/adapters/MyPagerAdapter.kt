@@ -8,6 +8,10 @@ import de.jannis_jahr.motioncapturingapp.ui.jobs.FinishedJobsFragment
 import de.jannis_jahr.motioncapturingapp.ui.jobs.JobsListFragment
 import de.jannis_jahr.motioncapturingapp.ui.jobs.PendingJobsFragment
 
+/**
+ * @deprecated
+ * This was used in an older version
+ */
 class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
     val finished = FinishedJobsFragment()
     val pending = PendingJobsFragment()
@@ -18,7 +22,6 @@ class MyPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, FragmentPag
     }
 
     override fun getItem(position: Int): Fragment {
-        // TODO: Pending and Failed
         return when(position) {
             0 -> finished
             1 -> pending

@@ -22,11 +22,15 @@ import de.jannis_jahr.motioncapturingapp.ui.view_holders.JobViewHolder
 import de.jannis_jahr.motioncapturingapp.utils.NetworkUtils
 import kotlinx.android.synthetic.main.fragment_home.*
 
+/**
+ * Fragment where the Bookmarks are stored
+ */
 class CollectionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var jobsViewModel: JobsViewModel
     private lateinit var jobList : ListView
     lateinit var myJobs : ArrayList<JobViewHolder>
+
     var textCardCount : TextView? = null
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -37,14 +41,21 @@ class CollectionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
                 ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
         )
         setHasOptionsMenu(true)
+
         val manager = NetworkUtils.getService(sharedPrefs)
+        // Create the JobsViewModel
         jobsViewModel = JobsViewModel(sharedPrefs, JobsRequestType.BOOKMARKS, null, null)
+        // inflate the view
         val v = inflater.inflate(R.layout.fragment_collections, container, false)
         jobList = v.findViewById(R.id.posts_list)
         myJobs = arrayListOf<JobViewHolder>()
+
+        // Create a job adapter
         val adapter = JobsAdapter(requireContext(), R.layout.big_list_item_jobs, myJobs, null)
         jobList.adapter = adapter
         jobList.emptyView = v.findViewById(R.id.posts_placeholder)
+
+        // Observe the jobsviewmodel and see, if it refreshes
         jobsViewModel.getJobs().observe(viewLifecycleOwner) { item ->
             // Remove the handlers
             myJobs.forEach { it.removeHandlers() }
@@ -65,6 +76,7 @@ class CollectionsListFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         pull_refresh_jobs.isRefreshing = true
+        // Observe the is Refreshing attribute
         jobsViewModel.isRefreshing.observe(viewLifecycleOwner) {
             pull_refresh_jobs.isRefreshing = it
         }

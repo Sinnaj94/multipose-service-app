@@ -41,14 +41,21 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 
+/**
+ * Dynamic and highly confgurable Adapter for Lists that show jobs
+ */
 class JobsAdapter(
         context: Context, resource: Int, list: ArrayList<JobViewHolder>, override var observer: JobListTagsObserver?
 ) : ArrayAdapter<JobViewHolder>(context, resource, list), JobListTagsObservable {
     var resource: Int
     var list: ArrayList<JobViewHolder>
     var vi: LayoutInflater
+    var peopleIndex: Int? = 0
 
 
+    /**
+     * define a view holder to store all the references to the view
+     */
     internal class ViewHolder(view: View?) {
         var image : ImageView? = view?.findViewById(R.id.thumbnail)
         var date : TextView? = view?.findViewById(R.id.job_date)
@@ -71,6 +78,9 @@ class JobsAdapter(
     }
 
 
+    /**
+     * load a web view into the app
+     */
     fun loadWebView(webView: WebView, job: Job, peopleIndex: Int, smoothing_level: Int) {
         val myHost = NetworkUtils.getHost(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
         val query_params =
@@ -87,6 +97,7 @@ class JobsAdapter(
         } else {
             "$myHost${ApplicationConstants.BASE_ROUTE}results/${job.id}/render_html/$peopleIndex$query_params"
         }
+        this.peopleIndex = peopleIndex
         webView.loadUrl(url)
     }
 
@@ -95,7 +106,7 @@ class JobsAdapter(
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val holder: ViewHolder
         val rowView: View?
-
+        // Create the view if not existant
         if(convertView == null) {
             rowView = vi.inflate(resource, null)
             holder = ViewHolder(rowView)
@@ -109,6 +120,7 @@ class JobsAdapter(
         holder.date?.text = formatter.format(jv.job.date_updated)
         holder.name?.text = jv.job.name
         val resultCode = jv.job.result.result_code
+        // Set the progress icon of a job (old code)
         when (resultCode) {
             2 -> {
                 holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_hourglass_bottom_24)
@@ -123,7 +135,8 @@ class JobsAdapter(
                 holder.progressIcon!!.setImageResource(R.drawable.ic_baseline_report_problem_24)
             }
         }
-        //bindImage(position = jv.job, thumb = holder)
+
+        // Setup the spinner (loading progress bar)
         if(holder.spinner != null) {
             val numPeople = jv.job.result.max_people
             val string = arrayListOf<String>()
@@ -145,11 +158,12 @@ class JobsAdapter(
 
             }
         }
+
+        // Check, if the user wants to smooth the data
         if(holder.smoothing != null) {
             val strings = context.resources.getStringArray(R.array.smoothing_strings)
             val spinnerArrayAdapter = ArrayAdapter<String>(context, android.R.layout.simple_spinner_dropdown_item, strings)
             holder.smoothing!!.adapter = spinnerArrayAdapter
-            // TODO: Machen
             holder.smoothing!!.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onNothingSelected(parent: AdapterView<*>?) {
                 }
@@ -160,15 +174,17 @@ class JobsAdapter(
 
             }
         }
+
+        // Setup the web view
         if(holder.webView != null) {
             holder.webView?.settings!!.javaScriptEnabled = true
             holder.webView?.settings!!.domStorageEnabled = true
             holder.webView?.settings!!.databaseEnabled = true
             val myHost = NetworkUtils.getHost(context.getSharedPreferences(ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE))
-            // TODO: 1 raus
             holder.webView?.loadUrl("$myHost${ApplicationConstants.BASE_ROUTE}results/${jv.job.id}/render_html")
         }
 
+        // Setup the bookmark view
         if(holder.bookmarkView != null) {
             holder.bookmarkView!!.setOnClickListener {
                 holder.bookmarkState = !holder.bookmarkState
@@ -191,13 +207,17 @@ class JobsAdapter(
             }
         }
 
+        // Set the username of the job creator
         if(holder.username != null) {
             holder.username!!.text = jv.job.user.username
         }
 
+        // Set a description
         if(holder.description != null) {
             holder.description!!.text = jv.job.description
         }
+
+        // Set tags
         if(holder.tags != null) {
             val sharedPrefs = context.getSharedPreferences(
                     ApplicationConstants.PREFERENCES, Context.MODE_PRIVATE
@@ -230,6 +250,7 @@ class JobsAdapter(
 
         }
 
+        // Setup a button which indicates, if a job is public or not
         if(holder.isPublicButton != null) {
             if(jv.job.public) {
                 holder.isPublicButton!!.setImageResource(R.drawable.ic_baseline_people_24)
@@ -239,6 +260,7 @@ class JobsAdapter(
             val s = NetworkUtils.getService(context.getSharedPreferences(ApplicationConstants.PREFERENCES,
                     Context.MODE_PRIVATE))
             holder.isPublicButton!!.setOnClickListener {
+                // make a call to the server to make the job public or private
                 if(jv.job.public) {
                     val call = s!!.deleteJobPost(jv.job.id)
                     call.enqueue(object: Callback<Job> {
@@ -277,6 +299,7 @@ class JobsAdapter(
             }
         }
 
+        // Check if the job was bookmarked by the current user
         if(holder.bookmarked != null) {
             holder.bookmarked!!.isChecked = jv.job.bookmarked
             holder.bookmarked!!.text = jv.job.num_bookmarks.toString()
@@ -316,6 +339,7 @@ class JobsAdapter(
             }
         }
 
+        // Button for sending to 3d animation software
         if(holder.sendTo3D != null) {
             holder.sendTo3D!!.setOnClickListener {
                 val fm = (context as AppCompatActivity).supportFragmentManager
@@ -324,10 +348,12 @@ class JobsAdapter(
                 if(prev != null) {
                     ft.remove(prev)
                 }
+                // Open the sendtoanimationdialogfragment
                 val f = SendToAnimationDialogFragment()
 
                 val args = Bundle()
-                args.putString("url", "${jv.job.result.output_bvh}/1")
+                // Put the string used from the webview
+                args.putString("url", holder.webView?.url)
                 f.arguments = args
 
                 f.show(ft, "dialog")
@@ -339,7 +365,9 @@ class JobsAdapter(
     }
 
 
-
+    /**
+     * @deprecated Used for binding an image to the job item
+     */
     private fun bindImage(position: Job, thumb: ViewHolder) {
         val jv = list.first {
             it.job.id == position.id

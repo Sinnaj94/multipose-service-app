@@ -9,6 +9,9 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Some Network utilities
+ */
 class NetworkUtils {
     companion object {
         val gson = GsonBuilder()

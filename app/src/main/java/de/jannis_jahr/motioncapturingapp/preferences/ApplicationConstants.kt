@@ -1,5 +1,8 @@
 package de.jannis_jahr.motioncapturingapp.preferences
 
+/**
+ * Definition of several application Constants (used for shared preferences for example)
+ */
 class ApplicationConstants {
     companion object {
         val TAGS: String = "tags"
