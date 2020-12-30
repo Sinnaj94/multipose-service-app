@@ -1,7 +1,10 @@
 # Motion Capturing Client
 This is the app that belongs to the server https://github.com/Sinnaj94/multipose-service-backend.
 This app was programmed for Android.
-# Images used
+## Public Images used in this repo
+- https://pixabay.com/illustrations/atom-chemistry-science-model-1674878/ (Free for commercial use)
+- https://pixabay.com/illustrations/man-women-couple-joy-dancing-2956377/ (Free for commercial use)
+- https://pixabay.com/vectors/camera-design-art-film-flash-1293880/ (Free for commercial use)
 ## Dependencies
 - org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version
 - androidx.core:core-ktx:1.1.0
